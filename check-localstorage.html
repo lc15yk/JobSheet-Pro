@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check LocalStorage</title>
+</head>
+<body>
+    <h1>Company Settings from LocalStorage:</h1>
+    <pre id="output"></pre>
+    <script>
+        const settings = localStorage.getItem('companySettings');
+        const output = document.getElementById('output');
+        if (settings) {
+            const parsed = JSON.parse(settings);
+            output.textContent = JSON.stringify(parsed, null, 2);
+        } else {
+            output.textContent = 'No company settings found in localStorage';
+        }
+    </script>
+</body>
+</html>
