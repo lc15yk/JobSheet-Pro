@@ -1,7 +1,25 @@
 {
+  "functions": {
+    "api/server.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/create-checkout-session",
+      "destination": "/api/server"
+    },
+    {
+      "source": "/verify-subscription",
+      "destination": "/api/server"
+    },
+    {
+      "source": "/generate-report",
+      "destination": "/api/server"
+    },
+    {
+      "source": "/webhook",
       "destination": "/api/server"
     },
     {
