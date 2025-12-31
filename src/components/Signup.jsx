@@ -88,7 +88,7 @@ export default function Signup() {
           </div>
 
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? 'Creating account...' : 'Start Free Trial'}
+            {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
