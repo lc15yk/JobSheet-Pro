@@ -113,7 +113,7 @@ Keep responses clear, concise, and suitable for invoices, reports, or client rec
 Write the job sheet as a single paragraph. Do not use headings, bullet points, bold text, brackets, or special formatting.`
 
       // Call our backend instead of OpenAI directly
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || ''
       const response = await fetch(`${backendUrl}/generate-report`, {
         method: 'POST',
         headers: {

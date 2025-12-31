@@ -27,7 +27,7 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
           console.log('📦 Session ID:', sessionId)
 
           // Call backend to verify and activate subscription
-          const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
+          const backendUrl = import.meta.env.VITE_BACKEND_URL || ''
           const response = await fetch(`${backendUrl}/verify-subscription`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

@@ -1,5 +1,5 @@
 // This is a serverless function wrapper for Vercel
-const app = require('../server.js');
+import app from '../server.js';
 
-module.exports = app;
+export default app;
 

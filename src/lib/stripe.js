@@ -13,7 +13,7 @@ const stripePromise = loadStripe(stripePublishableKey)
 export async function createCheckoutSession(userId, userEmail) {
   try {
     // Call your backend to create a Stripe checkout session
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || ''
     console.log('🔗 Backend URL:', backendUrl)
     console.log('📧 User Email:', userEmail)
     console.log('🆔 User ID:', userId)
