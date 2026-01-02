@@ -11,6 +11,10 @@
       "destination": "/api/server"
     },
     {
+      "source": "/create-portal-session",
+      "destination": "/api/server"
+    },
+    {
       "source": "/verify-subscription",
       "destination": "/api/server"
     },

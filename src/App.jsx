@@ -29,6 +29,15 @@ function MainApp() {
     }
   })
 
+  // Apply saved theme on app load
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'dark'
+    const savedColor = localStorage.getItem('colorScheme') || 'purple'
+    const root = document.documentElement
+    root.setAttribute('data-theme', savedTheme)
+    root.setAttribute('data-color', savedColor)
+  }, [])
+
   // Check if current user is admin
   useEffect(() => {
     const checkAdmin = async () => {
@@ -58,22 +67,16 @@ function MainApp() {
           <h1>JobSheet Pro</h1>
           <p className="subtitle">Professional job reports, simplified</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          {isAdmin && (
-            <button
-              className="settings-btn"
-              onClick={() => setShowSettings(!showSettings)}
-            >
-              Settings
-            </button>
-          )}
-          <button
-            className="settings-btn"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
-        </div>
+        <button
+          className="settings-btn"
+          onClick={() => setShowSettings(!showSettings)}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
       </header>
 
       <main className="app-main">
@@ -87,6 +90,8 @@ function MainApp() {
             settings={companySettings}
             onSave={handleSaveSettings}
             onCancel={() => setShowSettings(false)}
+            onLogout={handleLogout}
+            isAdmin={isAdmin}
           />
         ) : (
           <JobForm

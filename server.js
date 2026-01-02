@@ -125,6 +125,36 @@ app.post('/generate-report', async (req, res) => {
   }
 })
 
+// Create Stripe Customer Portal session for subscription management
+app.post('/create-portal-session', async (req, res) => {
+  const { customerId } = req.body
+
+  console.log('📋 Portal session request received')
+  console.log('Customer ID:', customerId)
+  console.log('Return URL:', process.env.CLIENT_URL)
+
+  try {
+    if (!customerId) {
+      console.error('❌ No customer ID provided')
+      return res.status(400).json({ error: 'Customer ID is required' })
+    }
+
+    console.log('🔄 Creating Stripe portal session...')
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${process.env.CLIENT_URL}`,
+    })
+
+    console.log('✅ Customer portal session created:', session.id)
+    console.log('Portal URL:', session.url)
+    res.json({ url: session.url })
+  } catch (error) {
+    console.error('❌ Error creating portal session:', error.message)
+    console.error('Full error:', error)
+    res.status(500).json({ error: error.message })
+  }
+})
+
 // Endpoint to verify and activate subscription after successful payment
 app.post('/verify-subscription', async (req, res) => {
   const { userId, sessionId } = req.body
@@ -283,6 +313,7 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`)
     console.log(`📍 Checkout endpoint: http://localhost:${PORT}/create-checkout-session`)
+    console.log(`📍 Portal endpoint: http://localhost:${PORT}/create-portal-session`)
     console.log(`📍 Verify endpoint: http://localhost:${PORT}/verify-subscription`)
     console.log(`📍 Webhook endpoint: http://localhost:${PORT}/webhook`)
   })

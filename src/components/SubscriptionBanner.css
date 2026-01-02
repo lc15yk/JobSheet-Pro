@@ -38,12 +38,12 @@
 
 .banner-text strong {
   font-size: 1.1rem;
-  color: #e0e0e0;
+  color: var(--text-primary);
 }
 
 .banner-text span {
   font-size: 0.9rem;
-  color: #999;
+  color: var(--text-secondary);
 }
 
 .banner-buttons {
@@ -53,7 +53,7 @@
 }
 
 .subscribe-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -82,7 +82,7 @@
 }
 
 .subscribe-btn-secondary {
-  background: #667eea !important;
+  background: var(--accent-primary) !important;
 }
 
 @keyframes pulse {
