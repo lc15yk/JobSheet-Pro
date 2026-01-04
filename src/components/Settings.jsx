@@ -136,7 +136,7 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
       <div className="settings">
         <div className="settings-header">
           <button type="button" className="back-button" onClick={onCancel}>
-            ‹ Back
+            ✕ Close
           </button>
           <h2>Settings</h2>
         </div>
@@ -177,7 +177,7 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
     <div className="settings">
       <div className="settings-header">
         <button type="button" className="back-button" onClick={() => setCurrentScreen('menu')}>
-          ‹ Back
+          ‹ Settings
         </button>
         <h2>{screenTitles[currentScreen]}</h2>
       </div>

@@ -3,6 +3,7 @@ import express from 'express'
 import Stripe from 'stripe'
 import cors from 'cors'
 import { createClient } from '@supabase/supabase-js'
+import { sendEmail } from './emailService.js'
 
 // Validate required environment variables
 const requiredEnvVars = [
@@ -252,6 +253,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
           break
         }
 
+        // Get user email
+        const { data: userData } = await supabase.auth.admin.getUserById(userId)
+        const userEmail = userData?.user?.email
+
         // Update subscription in database
         const subscriptionEnd = new Date()
         subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1) // 1 month from now
@@ -272,6 +277,11 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
           console.error('❌ Error updating subscription:', updateError)
         } else {
           console.log('✅ Subscription activated for user:', userId)
+
+          // Send subscription started email
+          if (userEmail) {
+            await sendEmail(userEmail, 'subscriptionStarted', { userName: userEmail.split('@')[0] })
+          }
         }
         break
 
@@ -279,6 +289,13 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       case 'customer.subscription.deleted':
         const subscription = event.data.object
         const status = subscription.status === 'active' ? 'active' : 'canceled'
+
+        // Get subscription record to find user
+        const { data: subRecord } = await supabase
+          .from('subscriptions')
+          .select('user_id')
+          .eq('stripe_subscription_id', subscription.id)
+          .single()
 
         const { error: subError } = await supabase
           .from('subscriptions')
@@ -292,6 +309,16 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
           console.error('❌ Error updating subscription status:', subError)
         } else {
           console.log('✅ Subscription updated:', subscription.id, status)
+
+          // Send cancellation email if subscription was canceled
+          if (status === 'canceled' && subRecord?.user_id) {
+            const { data: cancelUserData } = await supabase.auth.admin.getUserById(subRecord.user_id)
+            const cancelUserEmail = cancelUserData?.user?.email
+
+            if (cancelUserEmail) {
+              await sendEmail(cancelUserEmail, 'subscriptionCanceled', { userName: cancelUserEmail.split('@')[0] })
+            }
+          }
         }
         break
 

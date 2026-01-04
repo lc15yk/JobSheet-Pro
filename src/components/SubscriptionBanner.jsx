@@ -7,11 +7,19 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
   const [subscription, setSubscription] = useState(null)
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     loadSubscription()
     handlePaymentSuccess()
   }, [])
+
+  useEffect(() => {
+    // Show modal automatically for new users or expired subscriptions
+    if (subscription?.noSubscription || !subscription?.hasAccess) {
+      setShowModal(true)
+    }
+  }, [subscription])
 
   const handlePaymentSuccess = async () => {
     // Check if user just returned from successful payment
@@ -119,30 +127,7 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
 
   if (loading) return null
 
-  // Show "Start Free Trial" banner for new users
-  if (subscription?.noSubscription) {
-    return (
-      <div className="subscription-banner trial-banner">
-        <div className="banner-content">
-          <span className="banner-icon">🎁</span>
-          <div className="banner-text">
-            <strong>Welcome to JobSheet Pro!</strong>
-            <span>Start your 72-hour free trial to generate unlimited reports</span>
-          </div>
-        </div>
-        <div className="banner-buttons">
-          <button onClick={handleStartTrial} className="subscribe-btn" disabled={loading}>
-            {loading ? 'Starting...' : 'Start Free Trial (72 hours)'}
-          </button>
-          <button onClick={handleSubscribe} className="subscribe-btn subscribe-btn-secondary">
-            Subscribe Now - £9.99/month
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // Show trial banner
+  // Show trial countdown banner (non-blocking)
   if (subscription?.isTrialActive) {
     const timeLeft = subscription.trialEnd - new Date()
     const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60))
@@ -164,25 +149,73 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
     )
   }
 
-  // Show expired banner (blocks access)
-  if (!subscription?.hasAccess) {
+  // Show modal for new users or expired subscriptions
+  if (!showModal) return null
+
+  // New user modal
+  if (subscription?.noSubscription) {
     return (
-      <div className="subscription-banner expired-banner">
-        <div className="banner-content">
-          <span className="banner-icon">⚠️</span>
-          <div className="banner-text">
-            <strong>Subscription Required</strong>
-            <span>Your trial has ended. Subscribe to continue generating reports.</span>
+      <div className="subscription-modal-overlay">
+        <div className="subscription-modal">
+          <button className="modal-close" onClick={() => setShowModal(false)}>
+            ✕
+          </button>
+          <div className="modal-header">
+            <span className="modal-icon">🎁</span>
+            <h2>Welcome to JobSheet Pro!</h2>
+            <p>Choose how you'd like to get started</p>
+          </div>
+          <div className="modal-options">
+            <button onClick={handleStartTrial} className="modal-option-btn trial-btn" disabled={loading}>
+              <div className="option-content">
+                <span className="option-icon">⏱️</span>
+                <div className="option-text">
+                  <strong>Start Free Trial</strong>
+                  <span>72 hours of unlimited reports</span>
+                </div>
+              </div>
+            </button>
+            <button onClick={handleSubscribe} className="modal-option-btn subscribe-btn-full">
+              <div className="option-content">
+                <span className="option-icon">⭐</span>
+                <div className="option-text">
+                  <strong>Subscribe Now</strong>
+                  <span>£9.99/month - Unlimited reports</span>
+                </div>
+              </div>
+            </button>
           </div>
         </div>
-        <button onClick={handleSubscribe} className="subscribe-btn urgent">
-          Renew Subscription - £9.99/month
-        </button>
       </div>
     )
   }
 
-  // Active subscription - show nothing
+  // Expired subscription modal (cannot close)
+  if (!subscription?.hasAccess) {
+    return (
+      <div className="subscription-modal-overlay">
+        <div className="subscription-modal expired-modal">
+          <div className="modal-header">
+            <span className="modal-icon">⚠️</span>
+            <h2>Subscription Required</h2>
+            <p>Your trial has ended. Subscribe to continue generating reports.</p>
+          </div>
+          <div className="modal-options">
+            <button onClick={handleSubscribe} className="modal-option-btn subscribe-btn-urgent">
+              <div className="option-content">
+                <span className="option-icon">🔓</span>
+                <div className="option-text">
+                  <strong>Renew Subscription</strong>
+                  <span>£9.99/month - Unlimited reports</span>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return null
 }
 
