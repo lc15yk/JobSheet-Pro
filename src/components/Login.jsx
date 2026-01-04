@@ -25,7 +25,13 @@ export default function Login() {
         password,
       })
 
-      if (error) throw error
+      if (error) {
+        // Check if it's an email not confirmed error
+        if (error.message.includes('Email not confirmed')) {
+          throw new Error('Please confirm your email address before signing in. Check your inbox for the confirmation link.')
+        }
+        throw error
+      }
 
       // Redirect to main app
       navigate('/')

@@ -8,6 +8,7 @@ export default function Signup() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
 
@@ -15,6 +16,7 @@ export default function Signup() {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setMessage('')
 
     try {
       // Create user account (no trial created yet)
@@ -25,8 +27,17 @@ export default function Signup() {
 
       if (error) throw error
 
-      // Redirect to main app (user will see "Start Free Trial" button)
-      navigate('/')
+      // Check if email confirmation is required
+      if (data?.user?.identities?.length === 0) {
+        // User already exists
+        setError('An account with this email already exists. Please sign in.')
+      } else if (data?.user && !data?.session) {
+        // Email confirmation required
+        setMessage('✅ Account created! Please check your email to confirm your account before signing in.')
+      } else {
+        // Auto-confirmed (shouldn't happen with email confirmation enabled)
+        navigate('/')
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -41,6 +52,7 @@ export default function Signup() {
         <p className="auth-subtitle">Create your account and start your free trial!</p>
 
         {error && <div className="error-message">{error}</div>}
+        {message && <div className="success-message">{message}</div>}
 
         <form onSubmit={handleSignup} className="auth-form">
           <div className="form-group">
