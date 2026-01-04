@@ -13,9 +13,18 @@ export default function ProtectedRoute({ children }) {
       setLoading(false)
     })
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+    // Listen for auth changes (including email confirmation)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session?.user?.email)
+
+      // Handle email confirmation
+      if (event === 'SIGNED_IN' && session) {
+        console.log('✅ User signed in after email confirmation')
+        setUser(session.user)
+        setLoading(false)
+      } else {
+        setUser(session?.user ?? null)
+      }
     })
 
     return () => subscription.unsubscribe()

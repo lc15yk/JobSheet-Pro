@@ -114,6 +114,17 @@ function MainApp() {
 }
 
 function App() {
+  useEffect(() => {
+    // Handle auth state changes (including email confirmation redirects)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
+        console.log('✅ User authenticated:', session?.user?.email)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
   return (
     <Router>
       <Routes>
