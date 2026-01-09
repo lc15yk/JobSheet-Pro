@@ -19,7 +19,7 @@ function MainApp() {
   const [hasAccess, setHasAccess] = useState(true)
   const [subscriptionStatus, setSubscriptionStatus] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
-  const [viewMode, setViewMode] = useState('paragraph') // 'paragraph' or 'pdf'
+  const [viewMode, setViewMode] = useState('pdf') // 'paragraph' or 'pdf'
   const [companySettings, setCompanySettings] = useState(() => {
     const saved = localStorage.getItem('companySettings')
     return saved ? JSON.parse(saved) : {
@@ -75,8 +75,8 @@ function MainApp() {
                 onChange={(e) => setViewMode(e.target.value)}
                 style={{ display: 'block', minWidth: '150px' }}
               >
-                <option value="paragraph">📄 Paragraph</option>
                 <option value="pdf">📋 PDF</option>
+                <option value="paragraph">📄 Paragraph</option>
               </select>
             </div>
             <p className="subtitle">Professional job reports, simplified</p>

@@ -265,6 +265,14 @@
     padding: 16px 32px;
     font-size: 1rem;
   }
+
+  /* Make date inputs fit better on mobile */
+  .form-group input[type="date"] {
+    font-size: 16px;
+    padding: 12px;
+    min-height: 48px;
+    width: 100%;
+  }
 }
 
 /* Light Theme Adjustments */
