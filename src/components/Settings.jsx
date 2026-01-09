@@ -5,7 +5,7 @@ import './Settings.css'
 function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
   const [formData, setFormData] = useState(settings)
   const [showApiKey, setShowApiKey] = useState(false)
-  const [currentScreen, setCurrentScreen] = useState('menu') // 'menu', 'account', 'subscription', 'company', 'appearance'
+  const [currentScreen, setCurrentScreen] = useState('menu') // 'menu', 'account', 'subscription', 'company', 'appearance', 'ai'
   const [subscription, setSubscription] = useState(null)
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState(null)
@@ -149,9 +149,12 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
           <button type="button" className="menu-button" onClick={() => setCurrentScreen('subscription')}>
             Subscription <span className="arrow">›</span>
           </button>
+          <button type="button" className="menu-button" onClick={() => setCurrentScreen('company')}>
+            Company <span className="arrow">›</span>
+          </button>
           {isAdmin && (
-            <button type="button" className="menu-button" onClick={() => setCurrentScreen('company')}>
-              Company <span className="arrow">›</span>
+            <button type="button" className="menu-button" onClick={() => setCurrentScreen('ai')}>
+              AI <span className="arrow">›</span>
             </button>
           )}
           <button type="button" className="menu-button" onClick={() => setCurrentScreen('appearance')}>
@@ -214,7 +217,7 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
         </div>
       )}
 
-      {currentScreen === 'company' && isAdmin && (
+      {currentScreen === 'company' && (
         <form onSubmit={handleSubmit} className="settings-form">
           <div className="form-group">
             <label>Company Name</label>
@@ -258,43 +261,6 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
                 <img src={formData.logo} alt="Company logo" />
               </div>
             )}
-          </div>
-
-          <div className="form-group">
-            <label>OpenAI API Key</label>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <input
-                type={showApiKey ? 'text' : 'password'}
-                name="openaiApiKey"
-                value={formData.openaiApiKey || ''}
-                onChange={handleChange}
-                placeholder="sk-..."
-                style={{ flex: 1 }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowApiKey(!showApiKey)}
-                className="toggle-btn"
-                style={{ padding: '10px 15px' }}
-              >
-                {showApiKey ? 'Hide' : 'Show'}
-              </button>
-            </div>
-            <small style={{ color: '#999', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
-              Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" style={{ color: '#667eea' }}>OpenAI Dashboard</a>
-            </small>
-          </div>
-
-          <div className="ai-settings-section">
-            <h3>AI Report Generation</h3>
-            <p className="ai-description">
-              <strong>AI is enabled and ready to use!</strong><br/>
-              Powered by OpenAI GPT-4 - generate professional reports instantly.
-            </p>
-            <div className="ai-status">
-              <span className="status-badge">Active</span>
-              <span className="status-text">AI reports are enabled for all users</span>
-            </div>
           </div>
 
           <div className="settings-actions">
@@ -417,6 +383,55 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {currentScreen === 'ai' && (
+        <div className="settings-screen">
+          <h2>AI Configuration</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>OpenAI API Key</label>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  name="openaiApiKey"
+                  value={formData.openaiApiKey || ''}
+                  onChange={handleChange}
+                  placeholder="sk-..."
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="toggle-btn"
+                  style={{ padding: '10px 15px' }}
+                >
+                  {showApiKey ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              <small style={{ color: '#999', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
+                Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" style={{ color: '#667eea' }}>OpenAI Dashboard</a>
+              </small>
+            </div>
+
+            <div className="ai-settings-section">
+              <h3>AI Report Generation</h3>
+              <p className="ai-description">
+                <strong>AI is enabled and ready to use!</strong><br/>
+                Powered by OpenAI GPT-4 - generate professional reports instantly.
+              </p>
+              <div className="ai-status">
+                <span className="status-badge">Active</span>
+                <span className="status-text">AI reports are enabled for all users</span>
+              </div>
+            </div>
+
+            <div className="settings-actions">
+              <button type="submit" className="save-btn">Save Settings</button>
+              <button type="button" onClick={() => setCurrentScreen('menu')} className="cancel-btn">Cancel</button>
+            </div>
+          </form>
         </div>
       )}
 

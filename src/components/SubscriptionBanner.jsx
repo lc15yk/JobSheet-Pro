@@ -15,15 +15,17 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
   }, [])
 
   useEffect(() => {
-    // Show modal automatically for new users or expired subscriptions
-    if (subscription?.noSubscription || !subscription?.hasAccess) {
+    // Only show modal if trial/subscription has EXPIRED (not for new users with active trial)
+    if (subscription?.isExpired || (!subscription?.hasAccess && !subscription?.noSubscription)) {
       setShowModal(true)
     }
   }, [subscription])
 
   const handlePaymentSuccess = async () => {
-    // Check if user just returned from successful payment
+    // Check if user just returned from Stripe
     const urlParams = new URLSearchParams(window.location.search)
+
+    // Handle successful payment
     if (urlParams.get('success') === 'true') {
       console.log('✅ Payment successful! Activating subscription...')
 
@@ -58,6 +60,17 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
       } catch (error) {
         console.error('Error activating subscription:', error)
       }
+    }
+
+    // Handle canceled payment - just clean up the URL
+    if (urlParams.get('canceled') === 'true') {
+      console.log('⚠️ Payment canceled by user')
+      // Clear the session ID
+      localStorage.removeItem('stripe_session_id')
+      // Remove the canceled parameter from URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+      // Reload subscription data to show current status
+      await loadSubscription()
     }
   }
 
@@ -129,7 +142,7 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
 
   // Show trial countdown banner (non-blocking)
   if (subscription?.isTrialActive) {
-    const timeLeft = subscription.trialEnd - new Date()
+    const timeLeft = Math.max(0, subscription.trialEnd - new Date())
     const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60))
     const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))
 
@@ -152,8 +165,8 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
   // Show modal for new users or expired subscriptions
   if (!showModal) return null
 
-  // New user modal
-  if (subscription?.noSubscription) {
+  // New user modal (only for users who have NEVER had a subscription)
+  if (subscription?.noSubscription && !subscription?.isExpired) {
     return (
       <div className="subscription-modal-overlay">
         <div className="subscription-modal">
@@ -190,7 +203,7 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
     )
   }
 
-  // Expired subscription modal (cannot close)
+  // Expired subscription modal (cannot close) - for users whose trial/subscription expired
   if (!subscription?.hasAccess) {
     return (
       <div className="subscription-modal-overlay">
@@ -198,14 +211,18 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
           <div className="modal-header">
             <span className="modal-icon">⚠️</span>
             <h2>Subscription Required</h2>
-            <p>Your trial has ended. Subscribe to continue generating reports.</p>
+            <p>
+              {subscription?.isExpired
+                ? 'Your trial has ended. Subscribe to continue generating reports.'
+                : 'You need an active subscription to generate reports.'}
+            </p>
           </div>
           <div className="modal-options">
-            <button onClick={handleSubscribe} className="modal-option-btn subscribe-btn-urgent">
+            <button onClick={handleSubscribe} className="modal-option-btn subscribe-btn-urgent" disabled={loading}>
               <div className="option-content">
                 <span className="option-icon">🔓</span>
                 <div className="option-text">
-                  <strong>Renew Subscription</strong>
+                  <strong>{loading ? 'Loading...' : 'Subscribe Now'}</strong>
                   <span>£9.99/month - Unlimited reports</span>
                 </div>
               </div>

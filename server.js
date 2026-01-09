@@ -31,6 +31,119 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const app = express()
 app.use(cors())
+
+// Webhook endpoint needs raw body for signature verification
+// Must be defined BEFORE express.json() middleware
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature']
+  let event
+
+  // Verify webhook signature
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    )
+    console.log('✅ Webhook signature verified:', event.type)
+  } catch (err) {
+    console.error('❌ Webhook signature verification failed:', err.message)
+    return res.status(400).send(`Webhook Error: ${err.message}`)
+  }
+
+  // Handle the event
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object
+        const userId = session.metadata.userId
+
+        if (!userId) {
+          console.error('❌ No userId in session metadata')
+          break
+        }
+
+        // Get user email
+        const { data: userData } = await supabase.auth.admin.getUserById(userId)
+        const userEmail = userData?.user?.email
+
+        // Update subscription in database
+        const subscriptionEnd = new Date()
+        subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1) // 1 month from now
+
+        const { error: updateError } = await supabase
+          .from('subscriptions')
+          .update({
+            stripe_customer_id: session.customer,
+            stripe_subscription_id: session.subscription,
+            subscription_status: 'active',
+            subscription_end: subscriptionEnd.toISOString(),
+            trial_end: null, // Clear trial
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId)
+
+        if (updateError) {
+          console.error('❌ Error updating subscription:', updateError)
+        } else {
+          console.log('✅ Subscription activated for user:', userId)
+
+          // Send subscription started email
+          if (userEmail) {
+            await sendEmail(userEmail, 'subscriptionStarted', { userName: userEmail.split('@')[0] })
+          }
+        }
+        break
+
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted':
+        const subscription = event.data.object
+        const status = subscription.status === 'active' ? 'active' : 'canceled'
+
+        // Get subscription record to find user
+        const { data: subRecord } = await supabase
+          .from('subscriptions')
+          .select('user_id')
+          .eq('stripe_subscription_id', subscription.id)
+          .single()
+
+        const { error: subError } = await supabase
+          .from('subscriptions')
+          .update({
+            subscription_status: status,
+            updated_at: new Date().toISOString()
+          })
+          .eq('stripe_subscription_id', subscription.id)
+
+        if (subError) {
+          console.error('❌ Error updating subscription status:', subError)
+        } else {
+          console.log('✅ Subscription updated:', subscription.id, status)
+
+          // Send cancellation email if subscription was canceled
+          if (status === 'canceled' && subRecord?.user_id) {
+            const { data: cancelUserData } = await supabase.auth.admin.getUserById(subRecord.user_id)
+            const cancelUserEmail = cancelUserData?.user?.email
+
+            if (cancelUserEmail) {
+              await sendEmail(cancelUserEmail, 'subscriptionCanceled', { userName: cancelUserEmail.split('@')[0] })
+            }
+          }
+        }
+        break
+
+      default:
+        console.log('ℹ️ Unhandled event type:', event.type)
+    }
+  } catch (error) {
+    console.error('❌ Error processing webhook:', error)
+    return res.status(500).json({ error: 'Webhook processing failed' })
+  }
+
+  res.json({ received: true })
+})
+
+// Apply JSON middleware to all other routes
 app.use(express.json())
 
 // Initialize Supabase client (for updating subscription status)
@@ -61,6 +174,8 @@ app.post('/create-checkout-session', async (req, res) => {
       },
       subscription_data: {
         description: 'JobSheet Pro - Create professional job reports',
+        // Don't include trial_period_days - we handle trials ourselves in the app
+        // If the Stripe Price has a trial configured, it will be ignored
       },
       custom_text: {
         submit: {
@@ -221,116 +336,6 @@ app.post('/verify-subscription', async (req, res) => {
     console.error('Error verifying subscription:', error)
     res.status(500).json({ error: error.message })
   }
-})
-
-// Stripe webhook to handle subscription events
-app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature']
-  let event
-
-  // Verify webhook signature
-  try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    )
-    console.log('✅ Webhook signature verified:', event.type)
-  } catch (err) {
-    console.error('❌ Webhook signature verification failed:', err.message)
-    return res.status(400).send(`Webhook Error: ${err.message}`)
-  }
-
-  // Handle the event
-  try {
-    switch (event.type) {
-      case 'checkout.session.completed':
-        const session = event.data.object
-        const userId = session.metadata.userId
-
-        if (!userId) {
-          console.error('❌ No userId in session metadata')
-          break
-        }
-
-        // Get user email
-        const { data: userData } = await supabase.auth.admin.getUserById(userId)
-        const userEmail = userData?.user?.email
-
-        // Update subscription in database
-        const subscriptionEnd = new Date()
-        subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1) // 1 month from now
-
-        const { error: updateError } = await supabase
-          .from('subscriptions')
-          .update({
-            stripe_customer_id: session.customer,
-            stripe_subscription_id: session.subscription,
-            subscription_status: 'active',
-            subscription_end: subscriptionEnd.toISOString(),
-            trial_end: null, // Clear trial
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', userId)
-
-        if (updateError) {
-          console.error('❌ Error updating subscription:', updateError)
-        } else {
-          console.log('✅ Subscription activated for user:', userId)
-
-          // Send subscription started email
-          if (userEmail) {
-            await sendEmail(userEmail, 'subscriptionStarted', { userName: userEmail.split('@')[0] })
-          }
-        }
-        break
-
-      case 'customer.subscription.updated':
-      case 'customer.subscription.deleted':
-        const subscription = event.data.object
-        const status = subscription.status === 'active' ? 'active' : 'canceled'
-
-        // Get subscription record to find user
-        const { data: subRecord } = await supabase
-          .from('subscriptions')
-          .select('user_id')
-          .eq('stripe_subscription_id', subscription.id)
-          .single()
-
-        const { error: subError } = await supabase
-          .from('subscriptions')
-          .update({
-            subscription_status: status,
-            updated_at: new Date().toISOString()
-          })
-          .eq('stripe_subscription_id', subscription.id)
-
-        if (subError) {
-          console.error('❌ Error updating subscription status:', subError)
-        } else {
-          console.log('✅ Subscription updated:', subscription.id, status)
-
-          // Send cancellation email if subscription was canceled
-          if (status === 'canceled' && subRecord?.user_id) {
-            const { data: cancelUserData } = await supabase.auth.admin.getUserById(subRecord.user_id)
-            const cancelUserEmail = cancelUserData?.user?.email
-
-            if (cancelUserEmail) {
-              await sendEmail(cancelUserEmail, 'subscriptionCanceled', { userName: cancelUserEmail.split('@')[0] })
-            }
-          }
-        }
-        break
-
-      default:
-        console.log('ℹ️ Unhandled event type:', event.type)
-    }
-  } catch (error) {
-    console.error('❌ Error processing webhook:', error)
-    return res.status(500).json({ error: 'Webhook processing failed' })
-  }
-
-  res.json({ received: true })
 })
 
 const PORT = process.env.PORT || 3000

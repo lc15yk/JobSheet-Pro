@@ -33,7 +33,7 @@ export default function Signup() {
         setError('An account with this email already exists. Please sign in.')
       } else if (data?.user && !data?.session) {
         // Email confirmation required
-        setMessage('✅ Account created! Please check your email to confirm your account before signing in.')
+        setMessage('✅ Account created! Please check your email (and spam/junk folder) for a confirmation link. Mark it as "Not Spam" if needed.')
       } else {
         // Auto-confirmed (shouldn't happen with email confirmation enabled)
         navigate('/')

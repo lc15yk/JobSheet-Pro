@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './JobForm.css'
 
-function JobForm({ companySettings, hasAccess = true, subscriptionStatus = null }) {
+function JobForm({ companySettings, hasAccess = true, subscriptionStatus = null, viewMode = 'paragraph' }) {
   const [formData, setFormData] = useState({
     clientName: '',
     location: '',

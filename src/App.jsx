@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 import JobForm from './components/JobForm'
+import PDFJobSheet from './components/PDFJobSheet'
 import Settings from './components/Settings'
 import Login from './components/Login'
 import Signup from './components/Signup'
@@ -18,6 +19,7 @@ function MainApp() {
   const [hasAccess, setHasAccess] = useState(true)
   const [subscriptionStatus, setSubscriptionStatus] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [viewMode, setViewMode] = useState('paragraph') // 'paragraph' or 'pdf'
   const [companySettings, setCompanySettings] = useState(() => {
     const saved = localStorage.getItem('companySettings')
     return saved ? JSON.parse(saved) : {
@@ -65,7 +67,18 @@ function MainApp() {
       {!showSettings && (
         <header className="app-header">
           <div className="header-content">
-            <h1>JobSheet Pro</h1>
+            <div className="header-left">
+              <h1>JobSheet Pro</h1>
+              <select
+                className="view-mode-dropdown"
+                value={viewMode}
+                onChange={(e) => setViewMode(e.target.value)}
+                style={{ display: 'block', minWidth: '150px' }}
+              >
+                <option value="paragraph">📄 Paragraph</option>
+                <option value="pdf">📋 PDF</option>
+              </select>
+            </div>
             <p className="subtitle">Professional job reports, simplified</p>
           </div>
           <button
@@ -97,11 +110,18 @@ function MainApp() {
             onLogout={handleLogout}
             isAdmin={isAdmin}
           />
+        ) : viewMode === 'pdf' ? (
+          <PDFJobSheet
+            companySettings={companySettings}
+            hasAccess={hasAccess}
+            subscriptionStatus={subscriptionStatus}
+          />
         ) : (
           <JobForm
             companySettings={companySettings}
             hasAccess={hasAccess}
             subscriptionStatus={subscriptionStatus}
+            viewMode={viewMode}
           />
         )}
       </main>

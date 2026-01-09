@@ -16,6 +16,12 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 .header-content h1 {
   margin: 0;
   font-size: 1.6rem;
@@ -24,6 +30,37 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.view-mode-dropdown {
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-light);
+  color: var(--text-primary);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  outline: none;
+  position: relative;
+  z-index: 10;
+}
+
+.view-mode-dropdown:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-secondary);
+}
+
+.view-mode-dropdown:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.view-mode-dropdown option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 8px;
 }
 
 .subtitle {

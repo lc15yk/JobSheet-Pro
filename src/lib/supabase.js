@@ -31,31 +31,37 @@ export async function checkSubscription(userId) {
         hasAccess: false,
         isTrialActive: false,
         isPaidActive: false,
-        noSubscription: true // New user who hasn't started trial
+        noSubscription: true, // New user who hasn't started trial
+        isExpired: false
       }
     }
 
     if (error) {
       console.error('Error checking subscription:', error)
-      return { hasAccess: false, isTrialActive: false, isPaidActive: false }
+      return { hasAccess: false, isTrialActive: false, isPaidActive: false, isExpired: false }
     }
 
     const now = new Date()
     const trialEnd = data.trial_end ? new Date(data.trial_end) : null
     const subscriptionEnd = data.subscription_end ? new Date(data.subscription_end) : null
 
-    // Check if trial is active (within 72 hours of signup)
-    const isTrialActive = trialEnd && now < trialEnd && !data.stripe_subscription_id
+    // Check if trial is active (must be within trial period AND status is 'trial')
+    const isTrialActive = data.subscription_status === 'trial' && trialEnd && now < trialEnd
 
     // Check if paid subscription is active
     const isPaidActive = data.stripe_subscription_id &&
                          data.subscription_status === 'active' &&
                          subscriptionEnd && now < subscriptionEnd
 
+    // Check if subscription/trial has expired
+    const isExpired = (trialEnd && now >= trialEnd && data.subscription_status === 'trial') ||
+                      (subscriptionEnd && now >= subscriptionEnd && data.subscription_status === 'active')
+
     return {
       hasAccess: isTrialActive || isPaidActive,
       isTrialActive,
       isPaidActive,
+      isExpired,
       trialEnd,
       subscriptionEnd,
       subscriptionData: data,
@@ -63,7 +69,7 @@ export async function checkSubscription(userId) {
     }
   } catch (err) {
     console.error('Subscription check error:', err)
-    return { hasAccess: false, isTrialActive: false, isPaidActive: false }
+    return { hasAccess: false, isTrialActive: false, isPaidActive: false, isExpired: false }
   }
 }
 
