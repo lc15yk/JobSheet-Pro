@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './App.css'
 import JobForm from './components/JobForm'
 import PDFJobSheet from './components/PDFJobSheet'
+import ReportHistory from './components/ReportHistory'
 import Settings from './components/Settings'
 import Login from './components/Login'
 import Signup from './components/Signup'
@@ -33,8 +34,8 @@ function MainApp() {
 
   // Apply saved theme on app load
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'dark'
-    const savedColor = localStorage.getItem('colorScheme') || 'purple'
+    const savedTheme = localStorage.getItem('theme') || 'light'
+    const savedColor = localStorage.getItem('colorScheme') || 'blue'
     const root = document.documentElement
     root.setAttribute('data-theme', savedTheme)
     root.setAttribute('data-color', savedColor)
@@ -77,6 +78,7 @@ function MainApp() {
               >
                 <option value="pdf">📋 PDF</option>
                 <option value="paragraph">📄 Paragraph</option>
+                <option value="history">📚 History</option>
               </select>
             </div>
             <p className="subtitle">Professional job reports, simplified</p>
@@ -110,6 +112,8 @@ function MainApp() {
             onLogout={handleLogout}
             isAdmin={isAdmin}
           />
+        ) : viewMode === 'history' ? (
+          <ReportHistory />
         ) : viewMode === 'pdf' ? (
           <PDFJobSheet
             companySettings={companySettings}

@@ -395,6 +395,15 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
         .replace(/[^a-zA-Z0-9_-]/g, '_')
       doc.save(fileName)
 
+      // Save to history
+      saveToHistory({
+        type: 'pdf',
+        title: `${formData.customerCompanyName || 'Customer'} - ${formData.jobNumber || formData.jobDate}`,
+        content: enhancedWorkDescription,
+        formData: formData,
+        fileName: fileName
+      })
+
       alert('✅ PDF generated successfully!')
     } catch (error) {
       console.error('Error generating PDF:', error)
@@ -402,6 +411,19 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
     } finally {
       setIsGenerating(false)
     }
+  }
+
+  const saveToHistory = (reportData) => {
+    const history = JSON.parse(localStorage.getItem('reportHistory') || '[]')
+    const newReport = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      ...reportData
+    }
+    history.unshift(newReport) // Add to beginning
+    // Keep only last 50 reports
+    const trimmedHistory = history.slice(0, 50)
+    localStorage.setItem('reportHistory', JSON.stringify(trimmedHistory))
   }
 
   return (

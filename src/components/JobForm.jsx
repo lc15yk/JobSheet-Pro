@@ -133,12 +133,33 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
       const data = await response.json()
       setGeneratedReport(data.report)
+
+      // Save to history
+      saveToHistory({
+        type: 'paragraph',
+        title: formData.siteName || 'Untitled Report',
+        content: data.report,
+        formData: formData
+      })
     } catch (error) {
       console.error('Report Generation Error:', error)
       alert(`❌ Failed to generate report: ${error.message}`)
     } finally {
       setIsGenerating(false)
     }
+  }
+
+  const saveToHistory = (reportData) => {
+    const history = JSON.parse(localStorage.getItem('reportHistory') || '[]')
+    const newReport = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      ...reportData
+    }
+    history.unshift(newReport) // Add to beginning
+    // Keep only last 50 reports
+    const trimmedHistory = history.slice(0, 50)
+    localStorage.setItem('reportHistory', JSON.stringify(trimmedHistory))
   }
 
 
