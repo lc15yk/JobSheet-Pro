@@ -3,7 +3,7 @@ import { supabase, checkSubscription, createTrialSubscription } from '../lib/sup
 import { createCheckoutSession } from '../lib/stripe'
 import './SubscriptionBanner.css'
 
-export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
+export default function SubscriptionBanner({ onAccessChange, onStatusChange, showBanner = false }) {
   const [subscription, setSubscription] = useState(null)
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
@@ -140,8 +140,8 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange }) {
 
   if (loading) return null
 
-  // Show trial countdown banner (non-blocking)
-  if (subscription?.isTrialActive) {
+  // Show trial countdown banner (non-blocking) - ONLY if showBanner prop is true
+  if (showBanner && subscription?.isTrialActive) {
     const timeLeft = Math.max(0, subscription.trialEnd - new Date())
     const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60))
     const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))

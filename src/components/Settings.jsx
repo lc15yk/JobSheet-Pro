@@ -310,6 +310,7 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChang
           <SubscriptionBanner
             onAccessChange={onAccessChange}
             onStatusChange={onStatusChange}
+            showBanner={true}
           />
 
           {subscription?.isPaidActive && (
