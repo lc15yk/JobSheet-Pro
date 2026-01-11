@@ -487,6 +487,30 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
     localStorage.setItem('reportHistory', JSON.stringify(trimmedHistory))
   }
 
+  // Block access if no subscription
+  if (!hasAccess) {
+    return (
+      <div className="pdf-jobsheet-container">
+        <div style={{
+          padding: '40px',
+          textAlign: 'center',
+          background: 'var(--bg-secondary)',
+          borderRadius: '12px',
+          margin: '20px auto',
+          maxWidth: '600px'
+        }}>
+          <h2 style={{ color: 'var(--text-primary)', marginBottom: '15px' }}>🔒 Subscription Required</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+            You need an active subscription or free trial to access the PDF Job Sheet generator.
+          </p>
+          <p style={{ color: 'var(--text-secondary)' }}>
+            Please go to <strong>Settings → Subscription</strong> to start your free trial or subscribe.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="pdf-jobsheet-container">
       <form className="pdf-form" onSubmit={generatePDF}>
