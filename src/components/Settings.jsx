@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { supabase, checkSubscription } from '../lib/supabase'
 import './Settings.css'
+import ReportHistory from './ReportHistory'
 
 function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
   const [formData, setFormData] = useState(settings)
   const [showApiKey, setShowApiKey] = useState(false)
-  const [currentScreen, setCurrentScreen] = useState('menu') // 'menu', 'account', 'subscription', 'company', 'appearance', 'ai'
+  const [currentScreen, setCurrentScreen] = useState('menu') // 'menu', 'account', 'subscription', 'company', 'appearance', 'ai', 'history'
   const [subscription, setSubscription] = useState(null)
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState(null)
@@ -152,6 +153,9 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
           <button type="button" className="menu-button" onClick={() => setCurrentScreen('company')}>
             Company <span className="arrow">›</span>
           </button>
+          <button type="button" className="menu-button" onClick={() => setCurrentScreen('history')}>
+            Report History <span className="arrow">›</span>
+          </button>
           {isAdmin && (
             <button type="button" className="menu-button" onClick={() => setCurrentScreen('ai')}>
               AI <span className="arrow">›</span>
@@ -173,6 +177,7 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
     account: 'Account',
     subscription: 'Subscription',
     company: 'Company Settings',
+    history: 'Report History',
     appearance: 'Display & Appearance'
   }
 
@@ -527,6 +532,19 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {currentScreen === 'history' && (
+        <div className="settings-screen">
+          <div className="history-warning">
+            <div className="warning-icon">⚠️</div>
+            <div className="warning-content">
+              <h4>Auto-Delete Notice</h4>
+              <p>Reports are automatically deleted after 7 days to save storage space. Make sure to download or copy any reports you need to keep.</p>
+            </div>
+          </div>
+          <ReportHistory />
         </div>
       )}
     </div>

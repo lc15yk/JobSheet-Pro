@@ -80,6 +80,8 @@
   color: var(--text-primary);
   transition: all 0.3s ease;
   font-family: inherit;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .form-group input:focus,
@@ -251,6 +253,28 @@
     gap: 16px;
   }
 
+  .form-group {
+    width: 100%;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Make date inputs fit better on mobile */
+  .form-group input[type="date"] {
+    font-size: 16px;
+    padding: 12px;
+    min-height: 48px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
   .material-row {
     flex-direction: column;
     align-items: stretch;
@@ -264,14 +288,6 @@
   .generate-pdf-btn {
     padding: 16px 32px;
     font-size: 1rem;
-  }
-
-  /* Make date inputs fit better on mobile */
-  .form-group input[type="date"] {
-    font-size: 16px;
-    padding: 12px;
-    min-height: 48px;
-    width: 100%;
   }
 }
 

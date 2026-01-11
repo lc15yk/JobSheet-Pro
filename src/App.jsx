@@ -34,8 +34,8 @@ function MainApp() {
 
   // Apply saved theme on app load
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light'
-    const savedColor = localStorage.getItem('colorScheme') || 'blue'
+    const savedTheme = localStorage.getItem('theme') || 'dark'
+    const savedColor = localStorage.getItem('colorScheme') || 'purple'
     const root = document.documentElement
     root.setAttribute('data-theme', savedTheme)
     root.setAttribute('data-color', savedColor)
