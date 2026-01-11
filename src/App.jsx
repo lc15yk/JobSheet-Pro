@@ -96,13 +96,6 @@ function MainApp() {
       )}
 
       <main className="app-main">
-        {!showSettings && (
-          <SubscriptionBanner
-            onAccessChange={setHasAccess}
-            onStatusChange={setSubscriptionStatus}
-          />
-        )}
-
         {showSettings ? (
           <Settings
             settings={companySettings}
@@ -110,6 +103,8 @@ function MainApp() {
             onCancel={() => setShowSettings(false)}
             onLogout={handleLogout}
             isAdmin={isAdmin}
+            onAccessChange={setHasAccess}
+            onStatusChange={setSubscriptionStatus}
           />
         ) : viewMode === 'history' ? (
           <ReportHistory />

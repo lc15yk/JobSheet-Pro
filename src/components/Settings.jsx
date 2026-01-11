@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { supabase, checkSubscription } from '../lib/supabase'
 import './Settings.css'
 import ReportHistory from './ReportHistory'
+import SubscriptionBanner from './SubscriptionBanner'
 
-function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
+function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChange, onStatusChange }) {
   const [formData, setFormData] = useState(settings)
   const [showApiKey, setShowApiKey] = useState(false)
   const [currentScreen, setCurrentScreen] = useState('menu') // 'menu', 'account', 'subscription', 'company', 'appearance', 'ai', 'history'
@@ -277,6 +278,11 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin }) {
 
       {currentScreen === 'subscription' && (
         <div className="settings-screen">
+          <SubscriptionBanner
+            onAccessChange={onAccessChange}
+            onStatusChange={onStatusChange}
+          />
+
           {subscription?.isPaidActive && (
             <div className="subscription-info">
               <div className="info-card active-subscription">
