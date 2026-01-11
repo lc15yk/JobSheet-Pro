@@ -269,10 +269,19 @@
   /* Make date inputs fit better on mobile */
   .form-group input[type="date"] {
     font-size: 16px;
-    padding: 12px;
+    padding: 12px 8px;
     min-height: 48px;
     width: 100%;
     box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  /* Ensure date input doesn't overflow */
+  .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-left: 0;
+    padding: 0;
   }
 
   .material-row {
