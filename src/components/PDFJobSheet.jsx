@@ -2,7 +2,29 @@ import { useState, useEffect, useRef } from 'react'
 import jsPDF from 'jspdf'
 import './PDFJobSheet.css'
 
-// Get next job number from localStorage
+// Get all used job numbers from localStorage
+const getUsedJobNumbers = () => {
+  const used = localStorage.getItem('usedJobNumbers')
+  return used ? JSON.parse(used) : []
+}
+
+// Save a used job number
+const saveUsedJobNumber = (jobNumber) => {
+  const used = getUsedJobNumbers()
+  if (!used.includes(jobNumber)) {
+    used.push(jobNumber)
+    used.sort() // Keep them sorted
+    localStorage.setItem('usedJobNumbers', JSON.stringify(used))
+  }
+}
+
+// Check if a job number is already used
+const isJobNumberUsed = (jobNumber) => {
+  const used = getUsedJobNumbers()
+  return used.includes(jobNumber)
+}
+
+// Get next available job number from localStorage
 const getNextJobNumber = () => {
   const lastJobNumber = localStorage.getItem('lastJobNumber')
   if (!lastJobNumber) {
@@ -55,6 +77,19 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
+
+    // Validate job number if it's being changed
+    if (name === 'jobNumber') {
+      // Check if it's a valid 5-digit number
+      if (value && /^\d{5}$/.test(value)) {
+        // Check if this number was already used
+        if (isJobNumberUsed(value)) {
+          alert(`⚠️ Job number ${value} has already been used!\n\nPlease use a different number to avoid duplicates.`)
+          return // Don't update the field
+        }
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -429,6 +464,9 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
       // Update last job number in localStorage (only if it's a valid 5-digit number)
       let nextJobNumber = formData.jobNumber
       if (formData.jobNumber && /^\d{5}$/.test(formData.jobNumber)) {
+        // Save this job number as used
+        saveUsedJobNumber(formData.jobNumber)
+
         localStorage.setItem('lastJobNumber', formData.jobNumber)
         // Calculate next job number
         const nextNum = parseInt(formData.jobNumber) + 1
