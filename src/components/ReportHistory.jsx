@@ -49,6 +49,21 @@ function ReportHistory() {
     alert('✅ Report copied to clipboard!')
   }
 
+  const downloadPDF = (report) => {
+    if (!report.pdfData) {
+      alert('❌ PDF data not available')
+      return
+    }
+
+    // Create a link and trigger download
+    const link = document.createElement('a')
+    link.href = report.pdfData
+    link.download = report.fileName || 'JobSheet.pdf'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const formatDate = (timestamp) => {
     const date = new Date(timestamp)
     return date.toLocaleDateString('en-GB', {
@@ -101,24 +116,48 @@ function ReportHistory() {
                   </p>
                 </div>
                 <div className="report-actions">
-                  <button
-                    onClick={() => setExpandedReport(expandedReport === report.id ? null : report.id)}
-                    className="view-btn"
-                  >
-                    {expandedReport === report.id ? '▲ Hide' : '▼ View'}
-                  </button>
-                  <button onClick={() => copyToClipboard(report.content)} className="copy-btn">
-                    📋 Copy
-                  </button>
+                  {report.type === 'pdf' && report.pdfData ? (
+                    <>
+                      <button onClick={() => downloadPDF(report)} className="download-btn">
+                        ⬇️ Download
+                      </button>
+                      <button
+                        onClick={() => setExpandedReport(expandedReport === report.id ? null : report.id)}
+                        className="view-btn"
+                      >
+                        {expandedReport === report.id ? '▲ Hide' : '▼ Preview'}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setExpandedReport(expandedReport === report.id ? null : report.id)}
+                        className="view-btn"
+                      >
+                        {expandedReport === report.id ? '▲ Hide' : '▼ View'}
+                      </button>
+                      <button onClick={() => copyToClipboard(report.content)} className="copy-btn">
+                        📋 Copy
+                      </button>
+                    </>
+                  )}
                   <button onClick={() => deleteReport(report.id)} className="delete-btn">
                     🗑️
                   </button>
                 </div>
               </div>
-              
+
               {expandedReport === report.id && (
                 <div className="report-content-preview">
-                  <pre>{report.content}</pre>
+                  {report.type === 'pdf' && report.pdfData ? (
+                    <iframe
+                      src={report.pdfData}
+                      className="pdf-preview"
+                      title="PDF Preview"
+                    />
+                  ) : (
+                    <pre>{report.content}</pre>
+                  )}
                 </div>
               )}
             </div>

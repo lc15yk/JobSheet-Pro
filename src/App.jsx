@@ -78,7 +78,6 @@ function MainApp() {
               >
                 <option value="pdf">📋 PDF</option>
                 <option value="paragraph">📄 Paragraph</option>
-                <option value="history">📚 History</option>
               </select>
             </div>
             <p className="subtitle">Professional job reports, simplified</p>

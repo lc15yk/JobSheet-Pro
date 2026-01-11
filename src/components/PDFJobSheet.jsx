@@ -390,21 +390,32 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
       // Add watermark to the last page
       addWatermark()
 
-      // Save the PDF
+      // Generate filename
       const fileName = `JobSheet_${formData.jobNumber || formData.jobDate}_${formData.customerCompanyName || 'Customer'}.pdf`
         .replace(/[^a-zA-Z0-9_-]/g, '_')
+
+      // Save the PDF as base64 for history
+      const pdfBlob = doc.output('blob')
+      const pdfDataUrl = await new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result)
+        reader.readAsDataURL(pdfBlob)
+      })
+
+      // Download the PDF
       doc.save(fileName)
 
-      // Save to history
+      // Save to history with PDF data
       saveToHistory({
         type: 'pdf',
         title: `${formData.customerCompanyName || 'Customer'} - ${formData.jobNumber || formData.jobDate}`,
         content: enhancedWorkDescription,
         formData: formData,
-        fileName: fileName
+        fileName: fileName,
+        pdfData: pdfDataUrl // Store the PDF as base64
       })
 
-      alert('✅ PDF generated successfully!')
+      alert('✅ PDF generated successfully! Find it in Settings → Report History')
     } catch (error) {
       console.error('Error generating PDF:', error)
       alert('❌ Failed to generate PDF. Please try again.')
