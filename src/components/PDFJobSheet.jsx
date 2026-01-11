@@ -2,7 +2,18 @@ import { useState, useEffect, useRef } from 'react'
 import jsPDF from 'jspdf'
 import './PDFJobSheet.css'
 
+// Get next job number from localStorage
+const getNextJobNumber = () => {
+  const lastJobNumber = localStorage.getItem('lastJobNumber')
+  if (!lastJobNumber) {
+    return '00001'
+  }
+  const nextNumber = parseInt(lastJobNumber) + 1
+  return nextNumber.toString().padStart(5, '0')
+}
+
 function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = null }) {
+
   const [formData, setFormData] = useState({
     // 2️⃣ THEIR DETAILS (Customer / Site)
     customerCompanyName: '',
@@ -11,7 +22,7 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
     siteContactPhone: '',
 
     // 3️⃣ JOB DETAILS
-    jobNumber: '',
+    jobNumber: getNextJobNumber(),
     jobDate: new Date().toISOString().split('T')[0],
     engineerName: localStorage.getItem('engineerName') || '',
     jobType: 'Call-out', // Call-out / Service / Install
@@ -415,6 +426,38 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
         fileName: fileName,
         pdfData: pdfDataUrl // Store the PDF as base64
       })
+
+      // Update last job number in localStorage (only if it's a valid 5-digit number)
+      if (formData.jobNumber && /^\d{5}$/.test(formData.jobNumber)) {
+        localStorage.setItem('lastJobNumber', formData.jobNumber)
+      }
+
+      // Reset form and increment job number for next job
+      const nextJobNumber = getNextJobNumber()
+      setFormData({
+        customerCompanyName: '',
+        siteAddress: '',
+        siteContactName: '',
+        siteContactPhone: '',
+        jobNumber: nextJobNumber,
+        jobDate: new Date().toISOString().split('T')[0],
+        engineerName: localStorage.getItem('engineerName') || '',
+        jobType: 'Call-out',
+        workCompleted: '',
+        partsUsed: '',
+        followUpRequired: 'No',
+        customerName: '',
+        dateSigned: new Date().toISOString().split('T')[0]
+      })
+
+      // Clear signature
+      setSignatureData(null)
+      const canvas = canvasRef.current
+      if (canvas) {
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = 'white'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+      }
 
       alert('✅ PDF generated successfully! Find it in Settings → Report History')
     } catch (error) {
