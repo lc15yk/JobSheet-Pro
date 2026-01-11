@@ -328,7 +328,7 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
       // 3️⃣ JOB DETAILS
       // ========================================
       addText('JOB DETAILS', 12, true)
-      addText(`Job Number / Reference: ${formData.jobNumber || 'N/A'}`)
+      addText(`Job Number: ${formData.jobNumber || 'N/A'}`)
       addText(`Job Date: ${formData.jobDate}`)
       addText(`Engineer Name: ${formData.engineerName || 'N/A'}`)
       addText(`Job Type: ${formData.jobType}`)
@@ -544,7 +544,7 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
           <h3 className="section-title">🔧 Job Details</h3>
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="jobNumber">Job Number / Reference *</label>
+              <label htmlFor="jobNumber">Job Number *</label>
               <input
                 type="text"
                 id="jobNumber"
