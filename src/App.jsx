@@ -96,6 +96,14 @@ function MainApp() {
       )}
 
       <main className="app-main">
+        {/* Show subscription banner/modal on main pages (not in settings or history) */}
+        {!showSettings && viewMode !== 'history' && (
+          <SubscriptionBanner
+            onAccessChange={setHasAccess}
+            onStatusChange={setSubscriptionStatus}
+          />
+        )}
+
         {showSettings ? (
           <Settings
             settings={companySettings}

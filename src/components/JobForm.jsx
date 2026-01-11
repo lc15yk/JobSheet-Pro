@@ -164,32 +164,23 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
 
 
-  // Block access if no subscription
-  if (!hasAccess) {
-    return (
-      <div className="job-form-container">
-        <div style={{
-          padding: '40px',
-          textAlign: 'center',
-          background: 'var(--bg-secondary)',
-          borderRadius: '12px',
-          margin: '20px auto',
-          maxWidth: '600px'
-        }}>
-          <h2 style={{ color: 'var(--text-primary)', marginBottom: '15px' }}>🔒 Subscription Required</h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-            You need an active subscription or free trial to access the Paragraph generator.
-          </p>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Please go to <strong>Settings → Subscription</strong> to start your free trial or subscribe.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="job-form-container">
+    <div className="job-form-container" style={{ position: 'relative' }}>
+      {/* Disable form if no access */}
+      {!hasAccess && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.3)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 10,
+          borderRadius: '12px',
+          pointerEvents: 'all'
+        }} />
+      )}
       <form className="job-form" onSubmit={generateReport}>
         {/* Work Description */}
         <div className="work-details">
