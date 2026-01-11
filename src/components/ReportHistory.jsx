@@ -49,19 +49,44 @@ function ReportHistory() {
     alert('✅ Report copied to clipboard!')
   }
 
-  const downloadPDF = (report) => {
+  const sharePDF = async (report) => {
     if (!report.pdfData) {
       alert('❌ PDF data not available')
       return
     }
 
-    // Create a link and trigger download
-    const link = document.createElement('a')
-    link.href = report.pdfData
-    link.download = report.fileName || 'JobSheet.pdf'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    try {
+      // Convert base64 to blob
+      const response = await fetch(report.pdfData)
+      const blob = await response.blob()
+      const file = new File([blob], report.fileName || 'JobSheet.pdf', { type: 'application/pdf' })
+
+      // Check if Web Share API is supported
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: report.title,
+          text: 'Job Sheet PDF'
+        })
+      } else {
+        // Fallback to download if share is not supported
+        const link = document.createElement('a')
+        link.href = report.pdfData
+        link.download = report.fileName || 'JobSheet.pdf'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+    } catch (error) {
+      console.error('Error sharing PDF:', error)
+      // Fallback to download on error
+      const link = document.createElement('a')
+      link.href = report.pdfData
+      link.download = report.fileName || 'JobSheet.pdf'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
   }
 
   const formatDate = (timestamp) => {
@@ -118,8 +143,8 @@ function ReportHistory() {
                 <div className="report-actions">
                   {report.type === 'pdf' && report.pdfData ? (
                     <>
-                      <button onClick={() => downloadPDF(report)} className="download-btn">
-                        ⬇️ Download
+                      <button onClick={() => sharePDF(report)} className="share-btn">
+                        📤 Share
                       </button>
                       <button
                         onClick={() => setExpandedReport(expandedReport === report.id ? null : report.id)}

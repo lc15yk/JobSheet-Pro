@@ -211,7 +211,7 @@
   background: white;
 }
 
-.download-btn {
+.share-btn {
   background: var(--accent-primary);
   color: white;
   border: none;
@@ -225,7 +225,7 @@
   gap: 6px;
 }
 
-.download-btn:hover {
+.share-btn:hover {
   background: var(--accent-secondary);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
