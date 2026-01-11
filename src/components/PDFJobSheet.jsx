@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from 'react'
 import jsPDF from 'jspdf'
 import './PDFJobSheet.css'
 
-// Get all used job numbers from localStorage
+// Get all used job references from localStorage
 const getUsedJobNumbers = () => {
   const used = localStorage.getItem('usedJobNumbers')
   return used ? JSON.parse(used) : []
 }
 
-// Save a used job number
+// Save a used job reference
 const saveUsedJobNumber = (jobNumber) => {
   const used = getUsedJobNumbers()
   if (!used.includes(jobNumber)) {
@@ -18,13 +18,13 @@ const saveUsedJobNumber = (jobNumber) => {
   }
 }
 
-// Check if a job number is already used
+// Check if a job reference is already used
 const isJobNumberUsed = (jobNumber) => {
   const used = getUsedJobNumbers()
   return used.includes(jobNumber)
 }
 
-// Get next available job number from localStorage
+// Get next available job reference from localStorage
 const getNextJobNumber = () => {
   const lastJobNumber = localStorage.getItem('lastJobNumber')
   if (!lastJobNumber) {
@@ -78,13 +78,13 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
   const handleInputChange = (e) => {
     const { name, value } = e.target
 
-    // Validate job number if it's being changed
+    // Validate job reference if it's being changed
     if (name === 'jobNumber') {
       // Check if it's a valid 5-digit number
       if (value && /^\d{5}$/.test(value)) {
-        // Check if this number was already used
+        // Check if this reference was already used
         if (isJobNumberUsed(value)) {
-          alert(`⚠️ Job number ${value} has already been used!\n\nPlease use a different number to avoid duplicates.`)
+          alert(`⚠️ Job reference ${value} has already been used!\n\nPlease use a different reference to avoid duplicates.`)
           return // Don't update the field
         }
       }
@@ -363,7 +363,7 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
       // 3️⃣ JOB DETAILS
       // ========================================
       addText('JOB DETAILS', 12, true)
-      addText(`Job Number: ${formData.jobNumber || 'N/A'}`)
+      addText(`Job Reference: ${formData.jobNumber || 'N/A'}`)
       addText(`Job Date: ${formData.jobDate}`)
       addText(`Engineer Name: ${formData.engineerName || 'N/A'}`)
       addText(`Job Type: ${formData.jobType}`)
@@ -461,22 +461,22 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
         pdfData: pdfDataUrl // Store the PDF as base64
       })
 
-      // Update last job number in localStorage (only if it's a valid 5-digit number)
+      // Update last job reference in localStorage (only if it's a valid 5-digit number)
       let nextJobNumber = formData.jobNumber
       if (formData.jobNumber && /^\d{5}$/.test(formData.jobNumber)) {
-        // Save this job number as used
+        // Save this job reference as used
         saveUsedJobNumber(formData.jobNumber)
 
         localStorage.setItem('lastJobNumber', formData.jobNumber)
-        // Calculate next job number
+        // Calculate next job reference
         const nextNum = parseInt(formData.jobNumber) + 1
         nextJobNumber = nextNum.toString().padStart(5, '0')
       } else {
-        // If custom job number, get the next auto-increment number
+        // If custom job reference, get the next auto-increment number
         nextJobNumber = getNextJobNumber()
       }
 
-      // Reset form with incremented job number for next job
+      // Reset form with incremented job reference for next job
       setFormData({
         customerCompanyName: '',
         siteAddress: '',
@@ -603,7 +603,7 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="jobNumber">
-                Job Number *
+                Job Reference *
                 <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--text-tertiary)', marginLeft: '8px' }}>
                   (Auto-increments)
                 </span>
