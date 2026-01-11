@@ -603,6 +603,7 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
                 <option value="Call-out">Call-out</option>
                 <option value="Service">Service</option>
                 <option value="Install">Install</option>
+                <option value="Remedials">Remedials</option>
               </select>
             </div>
           </div>
