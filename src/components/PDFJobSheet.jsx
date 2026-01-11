@@ -394,13 +394,14 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
       const fileName = `JobSheet_${formData.jobNumber || formData.jobDate}_${formData.customerCompanyName || 'Customer'}.pdf`
         .replace(/[^a-zA-Z0-9_-]/g, '_')
 
-      // Save the PDF as base64 for history
-      const pdfBlob = doc.output('blob')
-      const pdfDataUrl = await new Promise((resolve) => {
-        const reader = new FileReader()
-        reader.onloadend = () => resolve(reader.result)
-        reader.readAsDataURL(pdfBlob)
-      })
+      // Get PDF as array buffer for better quality
+      const pdfArrayBuffer = doc.output('arraybuffer')
+
+      // Convert to base64 for storage
+      const pdfBase64 = btoa(
+        new Uint8Array(pdfArrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+      )
+      const pdfDataUrl = `data:application/pdf;base64,${pdfBase64}`
 
       // Download the PDF
       doc.save(fileName)
