@@ -56,37 +56,60 @@ function ReportHistory() {
     }
 
     try {
-      // Convert base64 to blob
-      const response = await fetch(report.pdfData)
-      const blob = await response.blob()
-      const file = new File([blob], report.fileName || 'JobSheet.pdf', { type: 'application/pdf' })
+      // Convert base64 data URL to binary
+      const base64Data = report.pdfData.split(',')[1]
+      const binaryString = atob(base64Data)
+      const bytes = new Uint8Array(binaryString.length)
 
-      // Check if Web Share API is supported
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: report.title,
-          text: 'Job Sheet PDF'
-        })
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i)
+      }
+
+      // Create blob with explicit PDF MIME type
+      const blob = new Blob([bytes], { type: 'application/pdf' })
+
+      // Create file from blob with .pdf extension
+      const fileName = report.fileName || 'JobSheet.pdf'
+      const file = new File([blob], fileName, {
+        type: 'application/pdf',
+        lastModified: new Date().getTime()
+      })
+
+      // Check if Web Share API is supported and can share files
+      if (navigator.share) {
+        // Try to share the file
+        try {
+          await navigator.share({
+            files: [file],
+            title: report.title || 'Job Sheet',
+            text: 'Job Sheet PDF Report'
+          })
+          console.log('PDF shared successfully')
+        } catch (shareError) {
+          // If share was cancelled or failed, fall back to download
+          if (shareError.name !== 'AbortError') {
+            console.log('Share failed, falling back to download')
+            downloadPDFFallback(report)
+          }
+        }
       } else {
-        // Fallback to download if share is not supported
-        const link = document.createElement('a')
-        link.href = report.pdfData
-        link.download = report.fileName || 'JobSheet.pdf'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+        // Browser doesn't support share, download instead
+        console.log('Share not supported, downloading instead')
+        downloadPDFFallback(report)
       }
     } catch (error) {
-      console.error('Error sharing PDF:', error)
-      // Fallback to download on error
-      const link = document.createElement('a')
-      link.href = report.pdfData
-      link.download = report.fileName || 'JobSheet.pdf'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      console.error('Error preparing PDF for sharing:', error)
+      alert('❌ Error sharing PDF. Please try again.')
     }
+  }
+
+  const downloadPDFFallback = (report) => {
+    const link = document.createElement('a')
+    link.href = report.pdfData
+    link.download = report.fileName || 'JobSheet.pdf'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   const formatDate = (timestamp) => {
