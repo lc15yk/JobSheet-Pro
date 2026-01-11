@@ -338,7 +338,6 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
       // 4️⃣ WORK CARRIED OUT
       // ========================================
       addText('WORK CARRIED OUT', 12, true)
-      addText('Work Completed:', 10, true)
       addText(enhancedWorkDescription || 'No work description provided')
       yPos += 3
 
