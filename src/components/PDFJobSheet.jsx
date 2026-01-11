@@ -428,12 +428,18 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
       })
 
       // Update last job number in localStorage (only if it's a valid 5-digit number)
+      let nextJobNumber = formData.jobNumber
       if (formData.jobNumber && /^\d{5}$/.test(formData.jobNumber)) {
         localStorage.setItem('lastJobNumber', formData.jobNumber)
+        // Calculate next job number
+        const nextNum = parseInt(formData.jobNumber) + 1
+        nextJobNumber = nextNum.toString().padStart(5, '0')
+      } else {
+        // If custom job number, get the next auto-increment number
+        nextJobNumber = getNextJobNumber()
       }
 
-      // Reset form and increment job number for next job
-      const nextJobNumber = getNextJobNumber()
+      // Reset form with incremented job number for next job
       setFormData({
         customerCompanyName: '',
         siteAddress: '',
@@ -544,7 +550,12 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
           <h3 className="section-title">🔧 Job Details</h3>
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="jobNumber">Job Number *</label>
+              <label htmlFor="jobNumber">
+                Job Number *
+                <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--text-tertiary)', marginLeft: '8px' }}>
+                  (Auto-increments)
+                </span>
+              </label>
               <input
                 type="text"
                 id="jobNumber"
@@ -552,7 +563,7 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
                 value={formData.jobNumber}
                 onChange={handleInputChange}
                 required
-                placeholder="e.g., JOB-2024-001"
+                placeholder="Auto-generated"
               />
             </div>
             <div className="form-group">
