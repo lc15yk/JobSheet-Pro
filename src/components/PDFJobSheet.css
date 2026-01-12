@@ -434,10 +434,12 @@
 @media (max-width: 768px) {
   .pdf-jobsheet-container {
     padding: 10px;
+    overflow-x: hidden;
   }
 
   .form-section {
-    padding: 16px;
+    padding: 12px;
+    margin: 0;
   }
 
   .ai-controls {
@@ -463,30 +465,36 @@
     width: 100%;
   }
 
-  /* Fix time input fields on mobile */
+  /* Fix time input fields on mobile - CRITICAL FIX */
   .form-row {
-    grid-template-columns: 1fr;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 15px;
+    width: 100%;
   }
 
   .form-group {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .form-group input,
   .form-group select,
   .form-group textarea {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    font-size: 16px; /* Prevents zoom on iOS */
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 12px !important;
   }
 
   input[type="time"] {
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
 
