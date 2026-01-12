@@ -432,6 +432,14 @@
 
 /* Responsive AI Controls */
 @media (max-width: 768px) {
+  .pdf-jobsheet-container {
+    padding: 10px;
+  }
+
+  .form-section {
+    padding: 16px;
+  }
+
   .ai-controls {
     flex-direction: column;
   }
@@ -458,12 +466,27 @@
   /* Fix time input fields on mobile */
   .form-row {
     grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 16px; /* Prevents zoom on iOS */
   }
 
   input[type="time"] {
     width: 100%;
     min-width: 0;
-    font-size: 16px; /* Prevents zoom on iOS */
+    max-width: 100%;
+    box-sizing: border-box;
   }
 }
 
