@@ -255,6 +255,32 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChang
       {currentScreen === 'company' && (
         <form onSubmit={handleSubmit} className="settings-form">
           <div className="form-group">
+            <label>Trade / Industry</label>
+            <div style={{
+              padding: '20px',
+              borderRadius: '8px',
+              border: '2px dashed var(--border-color)',
+              background: 'var(--bg-secondary)',
+              textAlign: 'center'
+            }}>
+              <p style={{
+                fontSize: '1.1rem',
+                color: 'var(--accent-color)',
+                fontWeight: '600',
+                marginBottom: '5px'
+              }}>
+                Coming Soon! 🚀
+              </p>
+              <p style={{
+                fontSize: '0.9rem',
+                color: 'var(--text-tertiary)'
+              }}>
+                Trade-specific fields are currently in development
+              </p>
+            </div>
+          </div>
+
+          <div className="form-group">
             <label>Company Name</label>
             <input
               type="text"

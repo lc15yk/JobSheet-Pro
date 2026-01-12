@@ -2,6 +2,82 @@ import { useState, useEffect, useRef } from 'react'
 import jsPDF from 'jspdf'
 import './PDFJobSheet.css'
 
+// Trade-specific field configurations
+const TRADE_FIELDS = {
+  'fire-security': [
+    { name: 'systemType', label: 'System Type', type: 'select', options: ['Fire Alarm System', 'Intruder Alarm', 'Emergency Lighting', 'Combined Fire & Intruder'], placeholder: 'Select system type' },
+    { name: 'certificateType', label: 'Certificate Type', type: 'select', options: ['Maintenance Report', 'Installation Certificate', 'Commissioning Certificate', 'Service Report'], placeholder: 'Select certificate type' },
+    { name: 'purposeOfVisit', label: 'Purpose of Visit', type: 'select', options: ['Annual Service', 'Periodic Check', 'Fault Call-out', 'Installation', 'Remedial Work'], placeholder: 'Select purpose' },
+    { name: 'numberOfZones', label: 'Number of Zones', type: 'number', placeholder: 'e.g., 10' },
+    { name: 'numberOfDetectors', label: 'Detectors Tested', type: 'number', placeholder: 'e.g., 25' },
+    { name: 'numberOfSounders', label: 'Sounders Tested', type: 'number', placeholder: 'e.g., 8' },
+    { name: 'controlPanelBattery', label: 'Control Panel Battery', type: 'select', options: ['OK', 'Replace Required', 'Replaced'], placeholder: 'Select status' },
+    { name: 'standbyBatteryVoltage', label: 'Standby Battery Voltage', type: 'text', placeholder: 'e.g., 27.6V' },
+    { name: 'systemCompliance', label: 'System Compliance', type: 'select', options: ['BS5839 Compliant', 'Non-Compliant', 'Remedial Work Required'], placeholder: 'Select compliance' },
+    { name: 'certificateNumber', label: 'Certificate Number', type: 'text', placeholder: 'e.g., SF_FDA_416-02' }
+  ],
+  'cctv': [
+    { name: 'numberOfCameras', label: 'Number of Cameras', type: 'number', placeholder: 'e.g., 8' },
+    { name: 'recordingDeviceType', label: 'Recording Device Type', type: 'select', options: ['NVR', 'DVR', 'Cloud Storage'], placeholder: 'Select type' },
+    { name: 'storageCapacity', label: 'Storage Capacity', type: 'text', placeholder: 'e.g., 2TB' },
+    { name: 'cameraResolution', label: 'Camera Resolution', type: 'select', options: ['2MP', '4MP', '5MP', '8MP', '4K'], placeholder: 'Select resolution' },
+    { name: 'remoteViewingStatus', label: 'Remote Viewing Status', type: 'select', options: ['Working', 'Not Working', 'Not Configured'], placeholder: 'Select status' }
+  ],
+  'hvac': [
+    { name: 'unitType', label: 'Unit Type', type: 'select', options: ['Air Conditioning', 'Heating System', 'Ventilation System', 'Heat Pump', 'Chiller', 'AHU (Air Handling Unit)'], placeholder: 'Select type' },
+    { name: 'serviceType', label: 'Service Type', type: 'select', options: ['Annual Service', 'Quarterly Service', 'Fault Repair', 'Installation', 'Gas Leak Check'], placeholder: 'Select service type' },
+    { name: 'refrigerantType', label: 'Refrigerant Type', type: 'text', placeholder: 'e.g., R410A, R32, R134a' },
+    { name: 'refrigerantPressure', label: 'Refrigerant Pressure', type: 'text', placeholder: 'e.g., High: 250 PSI, Low: 70 PSI' },
+    { name: 'filterStatus', label: 'Filter Status', type: 'select', options: ['Clean', 'Replaced', 'Needs Replacement'], placeholder: 'Select status' },
+    { name: 'temperatureDifferential', label: 'Temperature Differential', type: 'text', placeholder: 'e.g., 15°C' },
+    { name: 'condensateDrain', label: 'Condensate Drain', type: 'select', options: ['Clear', 'Cleaned', 'Blocked - Cleared'], placeholder: 'Select status' },
+    { name: 'electricalConnections', label: 'Electrical Connections', type: 'select', options: ['Secure', 'Tightened', 'Requires Attention'], placeholder: 'Select status' },
+    { name: 'systemPressure', label: 'System Pressure', type: 'text', placeholder: 'e.g., 1.5 bar' },
+    { name: 'fGasCompliance', label: 'F-Gas Compliance', type: 'select', options: ['Compliant', 'Non-Compliant', 'N/A'], placeholder: 'Select compliance' }
+  ],
+  'electrical': [
+    { name: 'workType', label: 'Work Type', type: 'select', options: ['Installation', 'Testing & Inspection', 'Fault Finding', 'Maintenance', 'Remedial Work', 'Emergency Call-out'], placeholder: 'Select work type' },
+    { name: 'boardType', label: 'Board/Panel Type', type: 'select', options: ['Distribution Board', 'Consumer Unit', 'Sub-Main', 'Motor Control Panel', 'Lighting Panel'], placeholder: 'Select type' },
+    { name: 'numberOfCircuits', label: 'Number of Circuits', type: 'number', placeholder: 'e.g., 12' },
+    { name: 'earthingSystem', label: 'Earthing System', type: 'select', options: ['TN-S', 'TN-C-S', 'TT', 'IT'], placeholder: 'Select system' },
+    { name: 'earthLoopImpedance', label: 'Earth Loop Impedance (Zs)', type: 'text', placeholder: 'e.g., 0.35Ω' },
+    { name: 'insulationResistance', label: 'Insulation Resistance', type: 'text', placeholder: 'e.g., >200MΩ' },
+    { name: 'rcdTestResult', label: 'RCD Test Result', type: 'select', options: ['Pass', 'Fail', 'N/A'], placeholder: 'Select result' },
+    { name: 'testResults', label: 'Overall Test Results', type: 'select', options: ['Pass', 'Fail', 'Remedial Work Required'], placeholder: 'Select result' },
+    { name: 'certificateType', label: 'Certificate Type', type: 'select', options: ['EIC (Electrical Installation Certificate)', 'EICR (Condition Report)', 'Minor Works', 'None'], placeholder: 'Select certificate' },
+    { name: 'certificateNumber', label: 'Certificate Number', type: 'text', placeholder: 'e.g., EICR-2024-001' }
+  ],
+  'plumbing': [
+    { name: 'workType', label: 'Work Type', type: 'select', options: ['Boiler Service', 'Leak Repair', 'Installation', 'Drainage', 'Water System'], placeholder: 'Select type' },
+    { name: 'boilerPressure', label: 'Boiler Pressure', type: 'text', placeholder: 'e.g., 1.5 bar' },
+    { name: 'waterPressure', label: 'Water Pressure', type: 'text', placeholder: 'e.g., 3 bar' },
+    { name: 'gasTestResult', label: 'Gas Test Result', type: 'select', options: ['Pass', 'Fail', 'N/A'], placeholder: 'Select result' },
+    { name: 'safetyDevicesChecked', label: 'Safety Devices Checked', type: 'select', options: ['Yes', 'No', 'N/A'], placeholder: 'Select option' }
+  ],
+  'access-control': [
+    { name: 'numberOfDoors', label: 'Number of Doors', type: 'number', placeholder: 'e.g., 5' },
+    { name: 'readerType', label: 'Reader Type', type: 'select', options: ['Proximity Card', 'Biometric', 'Keypad', 'Mobile App'], placeholder: 'Select type' },
+    { name: 'numberOfUsers', label: 'Number of Users', type: 'number', placeholder: 'e.g., 50' },
+    { name: 'lockType', label: 'Lock Type', type: 'select', options: ['Magnetic Lock', 'Electric Strike', 'Motorized Lock', 'Smart Lock'], placeholder: 'Select type' },
+    { name: 'systemIntegration', label: 'System Integration', type: 'select', options: ['Standalone', 'Integrated with CCTV', 'Integrated with Alarm', 'Full Integration'], placeholder: 'Select option' }
+  ],
+  'it-networking': [
+    { name: 'networkType', label: 'Network Type', type: 'select', options: ['LAN', 'WAN', 'WiFi', 'Fiber Optic'], placeholder: 'Select type' },
+    { name: 'numberOfPoints', label: 'Number of Network Points', type: 'number', placeholder: 'e.g., 20' },
+    { name: 'switchModel', label: 'Switch/Router Model', type: 'text', placeholder: 'e.g., Cisco SG350-28' },
+    { name: 'ipConfiguration', label: 'IP Configuration', type: 'text', placeholder: 'e.g., 192.168.1.0/24' },
+    { name: 'networkSpeed', label: 'Network Speed', type: 'select', options: ['100 Mbps', '1 Gbps', '10 Gbps'], placeholder: 'Select speed' }
+  ],
+  'building-maintenance': [
+    { name: 'maintenanceType', label: 'Maintenance Type', type: 'select', options: ['Preventive', 'Corrective', 'Emergency', 'Routine Inspection'], placeholder: 'Select type' },
+    { name: 'areaInspected', label: 'Area Inspected', type: 'text', placeholder: 'e.g., Roof, HVAC Room, Electrical Room' },
+    { name: 'equipmentCondition', label: 'Equipment Condition', type: 'select', options: ['Good', 'Fair', 'Poor', 'Requires Attention'], placeholder: 'Select condition' },
+    { name: 'safetyHazards', label: 'Safety Hazards Identified', type: 'select', options: ['None', 'Minor', 'Major', 'Critical'], placeholder: 'Select option' },
+    { name: 'nextInspectionDue', label: 'Next Inspection Due', type: 'date', placeholder: '' }
+  ],
+  'general': []
+}
+
 // Get all used job references from localStorage
 const getUsedJobNumbers = () => {
   const used = localStorage.getItem('usedJobNumbers')
@@ -46,8 +122,87 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
     // 3️⃣ JOB DETAILS
     jobNumber: getNextJobNumber(),
     jobDate: new Date().toISOString().split('T')[0],
+    timeIn: '',
+    timeOut: '',
     engineerName: localStorage.getItem('engineerName') || '',
     jobType: 'Call-out', // Call-out / Service / Install
+
+    // 3.5️⃣ TRADE-SPECIFIC FIELDS
+    // Fire & Security
+    certificateType: '',
+    purposeOfVisit: '',
+    numberOfZones: '',
+    numberOfDetectors: '',
+    numberOfSounders: '',
+    controlPanelBattery: '',
+    standbyBatteryVoltage: '',
+    systemCompliance: '',
+    certificateNumber: '',
+
+    // CCTV
+    numberOfCameras: '',
+    recordingDeviceType: '',
+    storageCapacity: '',
+    cameraResolution: '',
+    remoteViewingStatus: '',
+
+    // HVAC
+    unitType: '',
+    serviceType: '',
+    refrigerantType: '',
+    refrigerantPressure: '',
+    filterStatus: '',
+    temperatureDifferential: '',
+    condensateDrain: '',
+    electricalConnections: '',
+    systemPressure: '',
+    fGasCompliance: '',
+
+    // Electrical
+    boardType: '',
+    numberOfCircuits: '',
+    earthingSystem: '',
+    earthLoopImpedance: '',
+    insulationResistance: '',
+    rcdTestResult: '',
+    testResults: '',
+    certificateType: '',
+
+    // Plumbing
+    workType: '',
+    boilerPressure: '',
+    waterPressure: '',
+    gasTestResult: '',
+    safetyDevicesChecked: '',
+
+    // Access Control
+    numberOfDoors: '',
+    readerType: '',
+    numberOfUsers: '',
+    lockType: '',
+    systemIntegration: '',
+
+    // IT & Networking
+    networkType: '',
+    numberOfPoints: '',
+    switchModel: '',
+    ipConfiguration: '',
+    networkSpeed: '',
+
+    // Building Maintenance
+    maintenanceType: '',
+    areaInspected: '',
+    equipmentCondition: '',
+    safetyHazards: '',
+    nextInspectionDue: '',
+
+    // Common system details (for all trades)
+    systemType: '',
+    systemMake: '',
+    systemModel: '',
+    systemSerial: '',
+    lastServiceDate: '',
+    nextServiceDue: '',
 
     // 4️⃣ WORK CARRIED OUT
     workCompleted: '',
@@ -63,6 +218,7 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
   const [detailLevel, setDetailLevel] = useState('standard') // 'brief', 'standard', 'detailed'
   const [signatureData, setSignatureData] = useState(null) // Store signature as base64 image
   const [isDrawing, setIsDrawing] = useState(false)
+  const [isEnhancing, setIsEnhancing] = useState(false) // Track AI enhancement state
   const canvasRef = useRef(null)
 
   // Initialize canvas with white background
@@ -107,25 +263,24 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
     }
 
     try {
-      const prompt = `Site name: ${formData.customerCompanyName || 'N/A'}
-Work performed: ${inputText}
-Job type: ${formData.jobType}`
-
-      // Determine sentence count based on detail level
-      let sentenceGuidance = ''
+      // Build the prompt with detail level instruction (same as paragraph generator)
+      let detailInstruction = ''
       if (detailLevel === 'brief') {
-        sentenceGuidance = 'Write 3-4 sentences maximum. Keep it concise and to the point.'
-      } else if (detailLevel === 'standard') {
-        sentenceGuidance = 'Write 5-7 sentences. Provide a good level of detail without being excessive.'
+        detailInstruction = '\n\nWrite a BRIEF report - keep it short and to the point, around 2-3 sentences.'
       } else if (detailLevel === 'detailed') {
-        sentenceGuidance = 'Write 8-12 sentences. Provide comprehensive detail about all aspects of the work.'
+        detailInstruction = '\n\nWrite a DETAILED report - include more context and explanation, around 5-7 sentences.'
+      } else {
+        detailInstruction = '\n\nWrite a STANDARD report - clear and professional, around 3-4 sentences.'
       }
 
+      const prompt = `Site name: ${formData.customerCompanyName || 'N/A'}
+Work performed: ${inputText}
+Job type: ${formData.jobType}${detailInstruction}`
+
+      // Use the EXACT same system prompt as paragraph generator
       const systemPrompt = `You are a professional job sheet writer for trades and engineers.
 
 Your task is to turn short, basic, or poorly written notes into a clear, realistic, and professional job sheet.
-
-${sentenceGuidance}
 
 Write in plain English, as if a real engineer wrote it.
 Keep the tone professional but natural — not robotic.
@@ -162,9 +317,7 @@ Avoid stating that a job is incomplete unless explicitly requested. Use neutral 
 
 Keep responses clear, concise, and suitable for invoices, reports, or client records.
 
-Write the job sheet as a single paragraph. Do not use headings, bullet points, bold text, brackets, or special formatting.
-
-IMPORTANT: You must write exactly the number of sentences specified above based on the detail level. Count your sentences carefully.`
+Write the job sheet as a single paragraph. Do not use headings, bullet points, bold text, brackets, or special formatting.`
 
       const backendUrl = import.meta.env.VITE_BACKEND_URL || ''
       const response = await fetch(`${backendUrl}/generate-report`, {
@@ -253,6 +406,49 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
     setSignatureData(null)
   }
 
+  // Handle "Enhance" button click - enhance text in real-time
+  const handleEnhanceText = async () => {
+    if (!formData.workCompleted.trim()) {
+      alert('⚠️ Please enter some work description first before enhancing.')
+      return
+    }
+
+    // Check subscription access
+    if (!hasAccess) {
+      if (subscriptionStatus?.noSubscription) {
+        alert('🎁 Please start your free trial or subscribe to use AI enhancement.\n\nClick "Start Free Trial" above to get 72 hours of unlimited access!')
+      } else {
+        alert('⚠️ Your subscription has expired. Please renew to use AI enhancement.')
+      }
+      return
+    }
+
+    setIsEnhancing(true)
+
+    try {
+      console.log('🔄 Starting enhancement...')
+      console.log('Original text:', formData.workCompleted)
+
+      const enhancedText = await generateAIDescriptionForPDF(formData.workCompleted)
+
+      console.log('✅ Enhanced text:', enhancedText)
+
+      // Update the form data with enhanced text
+      setFormData({
+        ...formData,
+        workCompleted: enhancedText
+      })
+
+      // Show success message (removed alert to avoid interruption)
+      console.log('✨ Text enhanced successfully!')
+    } catch (error) {
+      console.error('Enhancement Error:', error)
+      alert('❌ Failed to enhance text. Please try again.')
+    } finally {
+      setIsEnhancing(false)
+    }
+  }
+
   const generatePDF = async (e) => {
     e.preventDefault()
 
@@ -269,8 +465,8 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
     setIsGenerating(true)
 
     try {
-      // Generate AI-enhanced work description
-      const enhancedWorkDescription = await generateAIDescriptionForPDF(formData.workCompleted)
+      // Use the work description as-is (user can enhance it before generating)
+      const workDescription = formData.workCompleted
 
       const doc = new jsPDF()
       const pageWidth = doc.internal.pageSize.getWidth()
@@ -278,21 +474,34 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
       const margin = 20
       let yPos = margin
 
+      // Color scheme
+      const primaryColor = [180, 180, 180] // Light gray
+      const lightGray = [245, 245, 245]
+      const darkGray = [80, 80, 80]
+      const borderColor = [200, 200, 200]
+
       // Helper function to add watermark to current page
       const addWatermark = () => {
         try {
-          // Create a semi-transparent watermark
-          doc.setGState(new doc.GState({ opacity: 0.5 }))
+          // Save current state
+          const currentPage = doc.internal.getCurrentPageInfo().pageNumber
 
-          // Position watermark in bottom right
-          const watermarkX = pageWidth - margin - 3
-          const watermarkY = pageHeight - margin - 3
+          // Create semi-transparent watermark
+          doc.setGState(new doc.GState({ opacity: 0.1 }))
 
-          // Add "JobSheet Pro." text - bold and prominent
-          doc.setTextColor(0, 0, 0) // Black text
-          doc.setFontSize(16)
+          // Center watermark diagonally
+          doc.setFontSize(50)
           doc.setFont('helvetica', 'bold')
-          doc.text('JobSheet Pro.', watermarkX, watermarkY, { align: 'right' })
+          doc.setTextColor(150, 150, 150)
+
+          // Rotate and position watermark in center
+          const centerX = pageWidth / 2
+          const centerY = pageHeight / 2
+
+          doc.text('JobSheet Pro', centerX, centerY, {
+            align: 'center',
+            angle: 45
+          })
 
           // Reset opacity and color
           doc.setGState(new doc.GState({ opacity: 1.0 }))
@@ -302,138 +511,339 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
         }
       }
 
-      // Helper function to add text with word wrap
-      const addText = (text, fontSize = 10, isBold = false) => {
-        doc.setFontSize(fontSize)
-        doc.setFont('helvetica', isBold ? 'bold' : 'normal')
-        const lines = doc.splitTextToSize(text, pageWidth - 2 * margin)
+      // Helper function to check if we need a new page
+      const checkNewPage = (requiredSpace = 20) => {
+        if (yPos + requiredSpace > pageHeight - margin - 10) {
+          addWatermark() // Add watermark before creating new page
+          doc.addPage()
+          yPos = margin
+          addWatermark() // Add watermark to new page
+          return true
+        }
+        return false
+      }
 
-        // Check if we need a new page
-        if (yPos + (lines.length * fontSize * 0.5) > pageHeight - margin) {
-          addWatermark() // Add watermark to current page before creating new page
+      // Helper function to draw a field (label + value)
+      const drawField = (label, value, width = null) => {
+        const fieldWidth = width || (pageWidth - 2 * margin)
+        const fieldHeight = 12
+
+        checkNewPage(fieldHeight)
+
+        // Label background
+        doc.setFillColor(...lightGray)
+        doc.rect(margin, yPos, fieldWidth, fieldHeight, 'F')
+
+        // Border
+        doc.setDrawColor(...borderColor)
+        doc.setLineWidth(0.2)
+        doc.rect(margin, yPos, fieldWidth, fieldHeight)
+
+        // Label text
+        doc.setFontSize(8)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(...darkGray)
+        doc.text(label, margin + 2, yPos + 4)
+
+        // Value text
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(0, 0, 0)
+        doc.text(value || '', margin + 2, yPos + 9)
+
+        yPos += fieldHeight
+      }
+
+      // Helper function to draw two fields side by side
+      const drawFieldPair = (label1, value1, label2, value2) => {
+        const fieldWidth = (pageWidth - 2 * margin - 4) / 2
+        const fieldHeight = 12
+
+        checkNewPage(fieldHeight)
+
+        // Left field
+        doc.setFillColor(...lightGray)
+        doc.rect(margin, yPos, fieldWidth, fieldHeight, 'F')
+        doc.setDrawColor(...borderColor)
+        doc.setLineWidth(0.2)
+        doc.rect(margin, yPos, fieldWidth, fieldHeight)
+
+        doc.setFontSize(8)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(...darkGray)
+        doc.text(label1, margin + 2, yPos + 4)
+
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(0, 0, 0)
+        doc.text(value1 || '', margin + 2, yPos + 9)
+
+        // Right field
+        const rightX = margin + fieldWidth + 4
+        doc.setFillColor(...lightGray)
+        doc.rect(rightX, yPos, fieldWidth, fieldHeight, 'F')
+        doc.setDrawColor(...borderColor)
+        doc.rect(rightX, yPos, fieldWidth, fieldHeight)
+
+        doc.setFontSize(8)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(...darkGray)
+        doc.text(label2, rightX + 2, yPos + 4)
+
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(0, 0, 0)
+        doc.text(value2 || '', rightX + 2, yPos + 9)
+
+        yPos += fieldHeight
+      }
+
+      // Helper function to draw section header
+      const drawSectionHeader = (title) => {
+        checkNewPage(10)
+
+        yPos += 3 // Add spacing before section
+
+        doc.setFillColor(...primaryColor)
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F')
+
+        doc.setFontSize(11)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(40, 40, 40)
+        doc.text(title, margin + 3, yPos + 5.5)
+
+        yPos += 8
+      }
+
+      // Helper function to draw multi-line text area
+      const drawTextArea = (text, minHeight = 30) => {
+        checkNewPage(minHeight)
+
+        const boxWidth = pageWidth - 2 * margin
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'normal')
+
+        const lines = doc.splitTextToSize(text || '', boxWidth - 6)
+        const lineHeight = 5
+        const textHeight = Math.max(lines.length * lineHeight + 8, minHeight)
+
+        // Check again with actual height
+        if (yPos + textHeight > pageHeight - margin - 10) {
           doc.addPage()
           yPos = margin
         }
 
-        doc.text(lines, margin, yPos)
-        yPos += lines.length * fontSize * 0.5 + 5
+        // Draw box with light background
+        doc.setFillColor(255, 255, 255)
+        doc.rect(margin, yPos, boxWidth, textHeight, 'F')
+
+        doc.setDrawColor(...borderColor)
+        doc.setLineWidth(0.2)
+        doc.rect(margin, yPos, boxWidth, textHeight)
+
+        // Add text
+        doc.setTextColor(0, 0, 0)
+        doc.text(lines, margin + 3, yPos + 6)
+
+        yPos += textHeight
       }
 
       // ========================================
-      // 1️⃣ YOUR DETAILS (Company Info at Top)
+      // HEADER
       // ========================================
 
-      // Company Logo
+      // Add watermark to first page
+      addWatermark()
+
+      // Header background bar
+      doc.setFillColor(...primaryColor)
+      doc.rect(0, 0, pageWidth, 35, 'F')
+
+      // Company Logo (if available)
       if (companySettings.logo) {
         try {
-          doc.addImage(companySettings.logo, 'PNG', margin, yPos, 40, 20)
-          yPos += 25
+          doc.addImage(companySettings.logo, 'PNG', margin, 8, 30, 15)
         } catch (err) {
           console.error('Error adding logo:', err)
         }
       }
 
-      // Title - use company name if available, otherwise "JOB SHEET"
-      doc.setFontSize(16)
+      // Document Title
+      doc.setFontSize(18)
       doc.setFont('helvetica', 'bold')
-      const headerTitle = companySettings?.companyName || 'JOB SHEET'
-      doc.text(headerTitle, pageWidth / 2, yPos, { align: 'center' })
-      yPos += 12
+      doc.setTextColor(40, 40, 40)
+      doc.text('JOB SHEET', pageWidth / 2, 18, { align: 'center' })
 
-      // Horizontal line
-      doc.setLineWidth(0.5)
-      doc.line(margin, yPos, pageWidth - margin, yPos)
-      yPos += 10
-
-      // ========================================
-      // 2️⃣ THEIR DETAILS (Customer / Site)
-      // ========================================
-      addText('CUSTOMER / SITE DETAILS', 12, true)
-      addText(`Customer / Company: ${formData.customerCompanyName || 'N/A'}`)
-      addText(`Site Address: ${formData.siteAddress || 'N/A'}`)
-      if (formData.siteContactName) {
-        addText(`Site Contact: ${formData.siteContactName}`)
-      }
-      if (formData.siteContactPhone) {
-        addText(`Site Phone: ${formData.siteContactPhone}`)
-      }
-      yPos += 5
-
-      // ========================================
-      // 3️⃣ JOB DETAILS
-      // ========================================
-      addText('JOB DETAILS', 12, true)
-      addText(`Job Reference: ${formData.jobNumber || 'N/A'}`)
-      addText(`Job Date: ${formData.jobDate}`)
-      addText(`Engineer Name: ${formData.engineerName || 'N/A'}`)
-      addText(`Job Type: ${formData.jobType}`)
-      yPos += 5
-
-      // ========================================
-      // 4️⃣ WORK CARRIED OUT
-      // ========================================
-      addText('WORK CARRIED OUT', 12, true)
-      addText(enhancedWorkDescription || 'No work description provided')
-      yPos += 3
-
-      if (formData.partsUsed) {
-        addText('Parts Used:', 10, true)
-        addText(formData.partsUsed)
-        yPos += 3
-      }
-
-      addText(`Follow-up Required: ${formData.followUpRequired}`, 10, true)
-      yPos += 10
-
-      // ========================================
-      // 5️⃣ SIGN-OFF
-      // ========================================
-      addText('SIGN-OFF', 12, true)
-      addText(`Customer Name: ${formData.customerName || '___________________________'}`)
-      yPos += 5
-
-      // Signature - either drawn or line
-      if (signatureData) {
-        // Add drawn signature
-        try {
-          doc.addImage(signatureData, 'PNG', margin, yPos, 60, 20)
-          yPos += 25
-        } catch (err) {
-          console.error('Error adding signature:', err)
-          // Fallback to signature line
-          doc.setLineWidth(0.5)
-          doc.line(margin, yPos, margin + 80, yPos)
-          yPos += 5
-        }
-      } else {
-        // Signature line for physical signing
-        doc.setLineWidth(0.5)
-        doc.line(margin, yPos, margin + 80, yPos)
-        yPos += 5
-      }
-      addText('Customer Signature', 9)
-      yPos += 5
-      addText(`Date Signed: ${formData.dateSigned}`, 10)
-
-      // Footer
-      const footerY = pageHeight - 15
+      // Company info (top right)
       doc.setFontSize(8)
       doc.setFont('helvetica', 'normal')
-      doc.setTextColor(128, 128, 128)
+      doc.setTextColor(60, 60, 60)
+      const rightX = pageWidth - margin
+      let headerY = 10
+
       if (companySettings.companyName) {
-        doc.text(companySettings.companyName, pageWidth / 2, footerY, { align: 'center' })
+        doc.text(companySettings.companyName, rightX, headerY, { align: 'right' })
+        headerY += 4
       }
-      if (companySettings.contactPhone || companySettings.contactEmail) {
-        doc.text(
-          `${companySettings.contactPhone || ''} | ${companySettings.contactEmail || ''}`,
-          pageWidth / 2,
-          footerY + 4,
-          { align: 'center' }
-        )
+      if (companySettings.contactPhone) {
+        doc.text(companySettings.contactPhone, rightX, headerY, { align: 'right' })
+        headerY += 4
+      }
+      if (companySettings.contactEmail) {
+        doc.text(companySettings.contactEmail, rightX, headerY, { align: 'right' })
       }
 
-      // Add watermark to the last page
-      addWatermark()
+      yPos = 42
+
+      // ========================================
+      // JOB INFORMATION
+      // ========================================
+      drawSectionHeader('Job Information')
+
+      drawFieldPair('Job Reference', formData.jobNumber || 'N/A', 'Date', formData.jobDate)
+      drawFieldPair('Time In', formData.timeIn || 'N/A', 'Time Out', formData.timeOut || 'N/A')
+      drawField('Job Type', formData.jobType)
+      drawField('Engineer', formData.engineerName || 'N/A')
+
+      yPos += 2
+
+      // ========================================
+      // SITE DETAILS
+      // ========================================
+      drawSectionHeader('Site Details')
+
+      drawField('Site Name', formData.customerCompanyName || 'N/A')
+      drawField('Site Address', formData.siteAddress || 'N/A')
+      drawFieldPair('Contact Name', formData.siteContactName || 'N/A', 'Contact Phone', formData.siteContactPhone || 'N/A')
+
+      yPos += 2
+
+      // ========================================
+      // TRADE-SPECIFIC DETAILS - Coming Soon
+      // ========================================
+      // Trade-specific fields will be added in future updates
+
+      // ========================================
+      // WORK DESCRIPTION
+      // ========================================
+      drawSectionHeader('Work Carried Out')
+      drawTextArea(workDescription || 'No work description provided', 50)
+
+      yPos += 2
+
+      // ========================================
+      // PARTS USED (if any)
+      // ========================================
+      if (formData.partsUsed && formData.partsUsed.trim()) {
+        drawSectionHeader('Parts & Materials Used')
+        drawTextArea(formData.partsUsed, 25)
+        yPos += 2
+      }
+
+      // ========================================
+      // FOLLOW-UP
+      // ========================================
+      drawSectionHeader('Follow-Up')
+      drawField('Follow-up Required', formData.followUpRequired)
+
+      yPos += 4
+
+      // ========================================
+      // SIGNATURES
+      // ========================================
+      drawSectionHeader('Sign-Off')
+
+      checkNewPage(50)
+
+      const sigBoxHeight = 30
+      const sigBoxWidth = (pageWidth - 2 * margin - 4) / 2
+
+      // Customer signature box
+      doc.setFillColor(...lightGray)
+      doc.rect(margin, yPos, sigBoxWidth, sigBoxHeight, 'F')
+      doc.setDrawColor(...borderColor)
+      doc.setLineWidth(0.2)
+      doc.rect(margin, yPos, sigBoxWidth, sigBoxHeight)
+
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(...darkGray)
+      doc.text('Customer Signature', margin + 2, yPos + 4)
+
+      // Add signature or name
+      if (signatureData) {
+        try {
+          doc.addImage(signatureData, 'PNG', margin + 5, yPos + 10, 50, 15)
+        } catch (err) {
+          console.error('Error adding signature:', err)
+          doc.setFontSize(10)
+          doc.setFont('helvetica', 'normal')
+          doc.setTextColor(0, 0, 0)
+          doc.text(formData.customerName || '', margin + 3, yPos + 18)
+        }
+      } else {
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(0, 0, 0)
+        doc.text(formData.customerName || '', margin + 3, yPos + 18)
+      }
+
+      // Engineer signature box
+      const rightBoxX = margin + sigBoxWidth + 4
+      doc.setFillColor(...lightGray)
+      doc.rect(rightBoxX, yPos, sigBoxWidth, sigBoxHeight, 'F')
+      doc.setDrawColor(...borderColor)
+      doc.rect(rightBoxX, yPos, sigBoxWidth, sigBoxHeight)
+
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(...darkGray)
+      doc.text('Engineer', rightBoxX + 2, yPos + 4)
+
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(0, 0, 0)
+      doc.text(formData.engineerName || '', rightBoxX + 3, yPos + 18)
+
+      yPos += sigBoxHeight + 2
+
+      // Date fields
+      doc.setFillColor(...lightGray)
+      doc.rect(margin, yPos, sigBoxWidth, 10, 'F')
+      doc.setDrawColor(...borderColor)
+      doc.rect(margin, yPos, sigBoxWidth, 10)
+
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(...darkGray)
+      doc.text('Date', margin + 2, yPos + 4)
+
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(0, 0, 0)
+      doc.text(formData.dateSigned, margin + 2, yPos + 8)
+
+      doc.setFillColor(...lightGray)
+      doc.rect(rightBoxX, yPos, sigBoxWidth, 10, 'F')
+      doc.setDrawColor(...borderColor)
+      doc.rect(rightBoxX, yPos, sigBoxWidth, 10)
+
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(...darkGray)
+      doc.text('Date', rightBoxX + 2, yPos + 4)
+
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(0, 0, 0)
+      doc.text(formData.dateSigned, rightBoxX + 2, yPos + 8)
+
+      // Footer
+      yPos = pageHeight - 15
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'italic')
+      doc.setTextColor(120, 120, 120)
+      doc.text('Generated by JobSheet Pro', pageWidth / 2, yPos, { align: 'center' })
 
       // Generate filename
       const fileName = `JobSheet_${formData.jobNumber || formData.jobDate}_${formData.customerCompanyName || 'Customer'}.pdf`
@@ -455,7 +865,7 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
       saveToHistory({
         type: 'pdf',
         title: `${formData.customerCompanyName || 'Customer'} - ${formData.jobNumber || formData.jobDate}`,
-        content: enhancedWorkDescription,
+        content: workDescription,
         formData: formData,
         fileName: fileName,
         pdfData: pdfDataUrl // Store the PDF as base64
@@ -484,6 +894,8 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
         siteContactPhone: '',
         jobNumber: nextJobNumber,
         jobDate: new Date().toISOString().split('T')[0],
+        timeIn: '',
+        timeOut: '',
         engineerName: localStorage.getItem('engineerName') || '',
         jobType: 'Call-out',
         workCompleted: '',
@@ -632,6 +1044,30 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
           </div>
           <div className="form-row">
             <div className="form-group">
+              <label htmlFor="timeIn">Time In</label>
+              <input
+                type="time"
+                id="timeIn"
+                name="timeIn"
+                value={formData.timeIn}
+                onChange={handleInputChange}
+                placeholder="e.g., 09:00"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="timeOut">Time Out</label>
+              <input
+                type="time"
+                id="timeOut"
+                name="timeOut"
+                value={formData.timeOut}
+                onChange={handleInputChange}
+                placeholder="e.g., 17:00"
+              />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
               <label htmlFor="engineerName">Engineer Name *</label>
               <input
                 type="text"
@@ -713,7 +1149,7 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
               onChange={handleInputChange}
               required
               rows="6"
-              placeholder="Type your work description... It will be professionally formatted when generating the PDF"
+              placeholder="Type your work description... Click 'Enhance with AI' to professionally format it"
               style={{
                 fontSize: '16px',
                 padding: '16px',
@@ -722,9 +1158,53 @@ IMPORTANT: You must write exactly the number of sentences specified above based 
                 resize: 'vertical'
               }}
             />
-            <small style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', marginTop: '4px', display: 'block' }}>
-              💡 Your description will be automatically enhanced and professionally formatted when you generate the PDF
-            </small>
+            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={handleEnhanceText}
+                disabled={isEnhancing || !formData.workCompleted.trim()}
+                style={{
+                  padding: '12px 40px',
+                  width: '100%',
+                  maxWidth: '400px',
+                  background: isEnhancing ? '#ccc' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: isEnhancing || !formData.workCompleted.trim() ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                {isEnhancing ? (
+                  <>
+                    <span style={{
+                      display: 'inline-block',
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid white',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite'
+                    }}></span>
+                    Enhancing...
+                  </>
+                ) : (
+                  <>
+                    Enhance
+                  </>
+                )}
+              </button>
+              <small style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', textAlign: 'center' }}>
+                Click to professionally format your description
+              </small>
+            </div>
           </div>
           <div className="form-group">
             <label htmlFor="partsUsed">Parts Used (Optional)</label>

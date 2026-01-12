@@ -28,7 +28,8 @@ function MainApp() {
       contactEmail: '',
       contactPhone: '',
       logo: null,
-      openaiApiKey: '' // OpenAI API key - user needs to add their own
+      openaiApiKey: '', // OpenAI API key - user needs to add their own
+      trade: 'general' // Trade/industry type
     }
   })
 

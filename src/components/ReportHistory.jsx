@@ -89,7 +89,9 @@ function ReportHistory() {
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
         await navigator.share({
           files: [pdfFile],
-          title: report.title || 'Job Sheet PDF'
+          title: 'JobSheet Pro',
+          text: report.title || 'Job Sheet PDF',
+          url: 'https://jobsheet.pro'
         })
       } else {
         // Fallback: download the file
