@@ -77,34 +77,6 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChang
     onSave(formData)
   }
 
-  // TEST FUNCTION: Expire trial immediately (for testing only)
-  const handleExpireTrial = async () => {
-    if (!confirm('⚠️ TEST MODE: This will expire your trial immediately. Continue?')) {
-      return
-    }
-
-    try {
-      setLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (user) {
-        const { error } = await supabase
-          .from('subscriptions')
-          .update({ trial_end: new Date('2024-01-01').toISOString() })
-          .eq('user_id', user.id)
-
-        if (error) throw error
-
-        alert('✅ Trial expired! Refresh the page to see changes.')
-        await loadUserAndSubscription()
-      }
-    } catch (error) {
-      console.error('Error expiring trial:', error)
-      alert('❌ Failed to expire trial: ' + error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleManageSubscription = async () => {
     if (!user) {
@@ -451,31 +423,7 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChang
             </div>
           )}
 
-          {/* TEST BUTTON - Remove in production */}
-          {subscription?.isTrialActive && (
-            <div style={{ marginTop: '20px', padding: '15px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '2px dashed orange' }}>
-              <h4 style={{ margin: '0 0 10px 0', color: 'orange' }}>🧪 Test Mode</h4>
-              <button
-                type="button"
-                onClick={handleExpireTrial}
-                disabled={loading}
-                style={{
-                  padding: '10px 20px',
-                  background: 'orange',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}
-              >
-                {loading ? 'Expiring...' : 'Expire Trial Now (Test)'}
-              </button>
-              <p style={{ margin: '10px 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                Click to instantly expire your trial for testing purposes
-              </p>
-            </div>
-          )}
+
         </div>
       )}
 
