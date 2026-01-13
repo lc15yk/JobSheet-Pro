@@ -15,8 +15,11 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange, sho
   }, [])
 
   useEffect(() => {
-    // Only show modal if trial/subscription has EXPIRED (not for new users with active trial)
-    if (subscription?.isExpired || (!subscription?.hasAccess && !subscription?.noSubscription)) {
+    // Only show modal if:
+    // 1. Trial/subscription has actually EXPIRED, OR
+    // 2. User is brand new (noSubscription = true)
+    // DO NOT show modal if trial is still active (even if hasAccess is false due to other issues)
+    if (subscription?.isExpired || subscription?.noSubscription) {
       setShowModal(true)
     }
   }, [subscription])

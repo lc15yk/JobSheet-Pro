@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import cors from 'cors'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from './emailService.js'
+import { PDFDocument } from 'pdf-lib'
 
 // Validate required environment variables
 const requiredEnvVars = [
@@ -143,8 +144,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
   res.json({ received: true })
 })
 
-// Apply JSON middleware to all other routes
-app.use(express.json())
+// Apply JSON middleware to all other routes with increased size limit for image uploads
+app.use(express.json({ limit: '50mb' }))
+app.use(express.urlencoded({ limit: '50mb', extended: true }))
 
 // Initialize Supabase client (for updating subscription status)
 const supabase = createClient(
@@ -240,6 +242,7 @@ app.post('/generate-report', async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 })
+
 
 // Create Stripe Customer Portal session for subscription management
 app.post('/create-portal-session', async (req, res) => {
