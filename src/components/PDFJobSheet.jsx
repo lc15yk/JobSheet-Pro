@@ -1153,21 +1153,23 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
               <div className="form-group">
                 <label htmlFor="dateOfPreviousInspection">Date of Previous Inspection</label>
                 <input
-                  type="date"
+                  type="text"
                   id="dateOfPreviousInspection"
                   name="dateOfPreviousInspection"
                   value={formData.dateOfPreviousInspection}
                   onChange={handleInputChange}
+                  placeholder="e.g., 15/01/2024"
                 />
               </div>
               <div className="form-group">
                 <label htmlFor="dateOfNextInspection">Date of Next Inspection</label>
                 <input
-                  type="date"
+                  type="text"
                   id="dateOfNextInspection"
                   name="dateOfNextInspection"
                   value={formData.dateOfNextInspection}
                   onChange={handleInputChange}
+                  placeholder="e.g., 15/01/2025"
                 />
               </div>
             </div>
