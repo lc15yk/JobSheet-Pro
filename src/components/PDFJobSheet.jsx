@@ -204,6 +204,14 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
     lastServiceDate: '',
     nextServiceDue: '',
 
+    // Servicing-specific fields
+    dateOfPreviousInspection: '',
+    dateOfNextInspection: '',
+    battery1AH: '',
+    battery2AH: '',
+    battery3AH: '',
+    battery4AH: '',
+
     // 4️⃣ WORK CARRIED OUT
     workCompleted: '',
     partsUsed: '',
@@ -718,6 +726,35 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       yPos += 1 // Reduced from 2
 
       // ========================================
+      // SERVICING DETAILS (only for Service job type)
+      // ========================================
+      if (formData.jobType === 'Service') {
+        drawSectionHeader('Servicing Details')
+
+        if (formData.dateOfPreviousInspection || formData.dateOfNextInspection) {
+          drawFieldPair(
+            'Previous Inspection',
+            formData.dateOfPreviousInspection || 'N/A',
+            'Next Inspection',
+            formData.dateOfNextInspection || 'N/A'
+          )
+        }
+
+        // Battery readings
+        const batteries = []
+        if (formData.battery1AH) batteries.push(`Battery 1: ${formData.battery1AH}`)
+        if (formData.battery2AH) batteries.push(`Battery 2: ${formData.battery2AH}`)
+        if (formData.battery3AH) batteries.push(`Battery 3: ${formData.battery3AH}`)
+        if (formData.battery4AH) batteries.push(`Battery 4: ${formData.battery4AH}`)
+
+        if (batteries.length > 0) {
+          drawField('Battery Readings', batteries.join(' | '))
+        }
+
+        yPos += 1
+      }
+
+      // ========================================
       // TRADE-SPECIFIC DETAILS - Coming Soon
       // ========================================
       // Trade-specific fields will be added in future updates
@@ -1106,6 +1143,86 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
             </div>
           </div>
         </div>
+
+        {/* Servicing-Specific Fields (only show when Job Type is "Service") */}
+        {formData.jobType === 'Service' && (
+          <div className="form-section">
+            <h3 className="section-title">🔧 Servicing Details</h3>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="dateOfPreviousInspection">Date of Previous Inspection</label>
+                <input
+                  type="date"
+                  id="dateOfPreviousInspection"
+                  name="dateOfPreviousInspection"
+                  value={formData.dateOfPreviousInspection}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="dateOfNextInspection">Date of Next Inspection</label>
+                <input
+                  type="date"
+                  id="dateOfNextInspection"
+                  name="dateOfNextInspection"
+                  value={formData.dateOfNextInspection}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="battery1AH">Battery 1 AH</label>
+                <input
+                  type="text"
+                  id="battery1AH"
+                  name="battery1AH"
+                  value={formData.battery1AH}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 12AH"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="battery2AH">Battery 2 AH</label>
+                <input
+                  type="text"
+                  id="battery2AH"
+                  name="battery2AH"
+                  value={formData.battery2AH}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 12AH"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="battery3AH">Battery 3 AH</label>
+                <input
+                  type="text"
+                  id="battery3AH"
+                  name="battery3AH"
+                  value={formData.battery3AH}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 12AH"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="battery4AH">Battery 4 AH</label>
+                <input
+                  type="text"
+                  id="battery4AH"
+                  name="battery4AH"
+                  value={formData.battery4AH}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 12AH"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 4️⃣ WORK CARRIED OUT */}
         <div className="form-section">
