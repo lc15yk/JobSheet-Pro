@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useNavigate, Link } from 'react-router-dom'
+import { metaPixelEvents } from '../lib/metaPixel'
 import './Auth.css'
 
 export default function Signup() {
@@ -34,8 +35,11 @@ export default function Signup() {
       } else if (data?.user && !data?.session) {
         // Email confirmation required
         setMessage('✅ Account created! Please check your email (and spam/junk folder) for a confirmation link. Mark it as "Not Spam" if needed.')
+        // Track signup
+        metaPixelEvents.completeRegistration(email)
       } else {
         // Auto-confirmed (shouldn't happen with email confirmation enabled)
+        metaPixelEvents.completeRegistration(email)
         navigate('/')
       }
     } catch (err) {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase, checkSubscription, createTrialSubscription } from '../lib/supabase'
 import { createCheckoutSession } from '../lib/stripe'
+import { metaPixelEvents } from '../lib/metaPixel'
 import './SubscriptionBanner.css'
 
 export default function SubscriptionBanner({ onAccessChange, onStatusChange, showBanner = false }) {
@@ -52,6 +53,9 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange, sho
 
           if (response.ok) {
             console.log('✅ Subscription activated!')
+            // Track successful purchase
+            metaPixelEvents.purchase()
+            metaPixelEvents.subscribe(user.email)
             // Clear the session ID
             localStorage.removeItem('stripe_session_id')
             // Remove the success parameter from URL
@@ -111,6 +115,8 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange, sho
 
     try {
       setLoading(true)
+      // Track checkout initiation
+      metaPixelEvents.initiateCheckout()
       await createCheckoutSession(user.id, user.email)
     } catch (error) {
       console.error('Subscription error:', error)
@@ -131,6 +137,8 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange, sho
       setLoading(true)
       await createTrialSubscription(user.id)
       console.log('✅ Trial created, reloading subscription...')
+      // Track trial start
+      metaPixelEvents.startTrial(user.email)
       await loadSubscription()
       console.log('✅ Subscription reloaded')
     } catch (error) {

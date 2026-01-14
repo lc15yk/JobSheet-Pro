@@ -526,7 +526,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // Helper function to draw a field (label + value)
       const drawField = (label, value, width = null) => {
         const fieldWidth = width || (pageWidth - 2 * margin)
-        const fieldHeight = 12
+        const fieldHeight = 9 // Reduced from 12
 
         checkNewPage(fieldHeight)
 
@@ -540,16 +540,16 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         doc.rect(margin, yPos, fieldWidth, fieldHeight)
 
         // Label text
-        doc.setFontSize(8)
+        doc.setFontSize(7) // Reduced from 8
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(...darkGray)
-        doc.text(label, margin + 2, yPos + 4)
+        doc.text(label, margin + 2, yPos + 3)
 
         // Value text
-        doc.setFontSize(10)
+        doc.setFontSize(9) // Reduced from 10
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(0, 0, 0)
-        doc.text(value || '', margin + 2, yPos + 9)
+        doc.text(value || '', margin + 2, yPos + 7)
 
         yPos += fieldHeight
       }
@@ -557,7 +557,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // Helper function to draw two fields side by side
       const drawFieldPair = (label1, value1, label2, value2) => {
         const fieldWidth = (pageWidth - 2 * margin - 4) / 2
-        const fieldHeight = 12
+        const fieldHeight = 9 // Reduced from 12
 
         checkNewPage(fieldHeight)
 
@@ -568,15 +568,15 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         doc.setLineWidth(0.2)
         doc.rect(margin, yPos, fieldWidth, fieldHeight)
 
-        doc.setFontSize(8)
+        doc.setFontSize(7) // Reduced from 8
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(...darkGray)
-        doc.text(label1, margin + 2, yPos + 4)
+        doc.text(label1, margin + 2, yPos + 3)
 
-        doc.setFontSize(10)
+        doc.setFontSize(9) // Reduced from 10
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(0, 0, 0)
-        doc.text(value1 || '', margin + 2, yPos + 9)
+        doc.text(value1 || '', margin + 2, yPos + 7)
 
         // Right field
         const rightX = margin + fieldWidth + 4
@@ -585,47 +585,47 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         doc.setDrawColor(...borderColor)
         doc.rect(rightX, yPos, fieldWidth, fieldHeight)
 
-        doc.setFontSize(8)
+        doc.setFontSize(7) // Reduced from 8
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(...darkGray)
-        doc.text(label2, rightX + 2, yPos + 4)
+        doc.text(label2, rightX + 2, yPos + 3)
 
-        doc.setFontSize(10)
+        doc.setFontSize(9) // Reduced from 10
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(0, 0, 0)
-        doc.text(value2 || '', rightX + 2, yPos + 9)
+        doc.text(value2 || '', rightX + 2, yPos + 7)
 
         yPos += fieldHeight
       }
 
       // Helper function to draw section header
       const drawSectionHeader = (title) => {
-        checkNewPage(10)
+        checkNewPage(8)
 
-        yPos += 3 // Add spacing before section
+        yPos += 2 // Reduced from 3
 
         doc.setFillColor(...primaryColor)
-        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F')
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 6, 'F') // Reduced from 8
 
-        doc.setFontSize(11)
+        doc.setFontSize(9) // Reduced from 11
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(40, 40, 40)
-        doc.text(title, margin + 3, yPos + 5.5)
+        doc.text(title, margin + 3, yPos + 4.5)
 
-        yPos += 8
+        yPos += 6 // Reduced from 8
       }
 
       // Helper function to draw multi-line text area
-      const drawTextArea = (text, minHeight = 30) => {
+      const drawTextArea = (text, minHeight = 20) => { // Reduced from 30
         checkNewPage(minHeight)
 
         const boxWidth = pageWidth - 2 * margin
-        doc.setFontSize(10)
+        doc.setFontSize(9) // Reduced from 10
         doc.setFont('helvetica', 'normal')
 
         const lines = doc.splitTextToSize(text || '', boxWidth - 6)
-        const lineHeight = 5
-        const textHeight = Math.max(lines.length * lineHeight + 8, minHeight)
+        const lineHeight = 4 // Reduced from 5
+        const textHeight = Math.max(lines.length * lineHeight + 6, minHeight) // Reduced padding from 8 to 6
 
         // Check again with actual height
         if (yPos + textHeight > pageHeight - margin - 10) {
@@ -643,7 +643,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
         // Add text
         doc.setTextColor(0, 0, 0)
-        doc.text(lines, margin + 3, yPos + 6)
+        doc.text(lines, margin + 3, yPos + 5) // Reduced from 6
 
         yPos += textHeight
       }
@@ -657,43 +657,39 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
       // Header background bar
       doc.setFillColor(...primaryColor)
-      doc.rect(0, 0, pageWidth, 35, 'F')
+      doc.rect(0, 0, pageWidth, 28, 'F') // Reduced from 35
 
       // Company Logo (if available)
       if (companySettings.logo) {
         try {
-          doc.addImage(companySettings.logo, 'PNG', margin, 8, 30, 15)
+          doc.addImage(companySettings.logo, 'PNG', margin, 6, 25, 12) // Reduced size
         } catch (err) {
           console.error('Error adding logo:', err)
         }
       }
 
-      // Document Title
-      doc.setFontSize(18)
+      // Document Title - Company Name
+      doc.setFontSize(14) // Reduced from 18
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(40, 40, 40)
-      doc.text('JOB SHEET', pageWidth / 2, 18, { align: 'center' })
+      doc.text(companySettings.companyName || 'JOB SHEET', pageWidth / 2, 14, { align: 'center' })
 
       // Company info (top right)
-      doc.setFontSize(8)
+      doc.setFontSize(7) // Reduced from 8
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(60, 60, 60)
       const rightX = pageWidth - margin
-      let headerY = 10
+      let headerY = 8
 
-      if (companySettings.companyName) {
-        doc.text(companySettings.companyName, rightX, headerY, { align: 'right' })
-        headerY += 4
-      }
       if (companySettings.contactPhone) {
         doc.text(companySettings.contactPhone, rightX, headerY, { align: 'right' })
-        headerY += 4
+        headerY += 3.5
       }
       if (companySettings.contactEmail) {
         doc.text(companySettings.contactEmail, rightX, headerY, { align: 'right' })
       }
 
-      yPos = 42
+      yPos = 32 // Reduced from 42
 
       // ========================================
       // JOB INFORMATION
@@ -705,7 +701,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       drawField('Job Type', formData.jobType)
       drawField('Engineer', formData.engineerName || 'N/A')
 
-      yPos += 2
+      yPos += 1 // Reduced from 2
 
       // ========================================
       // SITE DETAILS
@@ -714,9 +710,12 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
       drawField('Site Name', formData.customerCompanyName || 'N/A')
       drawField('Site Address', formData.siteAddress || 'N/A')
+      if (formData.systemType && formData.systemType.trim()) {
+        drawField('System Type', formData.systemType)
+      }
       drawFieldPair('Contact Name', formData.siteContactName || 'N/A', 'Contact Phone', formData.siteContactPhone || 'N/A')
 
-      yPos += 2
+      yPos += 1 // Reduced from 2
 
       // ========================================
       // TRADE-SPECIFIC DETAILS - Coming Soon
@@ -727,17 +726,17 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // WORK DESCRIPTION
       // ========================================
       drawSectionHeader('Work Carried Out')
-      drawTextArea(workDescription || 'No work description provided', 50)
+      drawTextArea(workDescription || 'No work description provided', 30) // Reduced from 50
 
-      yPos += 2
+      yPos += 1 // Reduced from 2
 
       // ========================================
       // PARTS USED (if any)
       // ========================================
       if (formData.partsUsed && formData.partsUsed.trim()) {
         drawSectionHeader('Parts & Materials Used')
-        drawTextArea(formData.partsUsed, 25)
-        yPos += 2
+        drawTextArea(formData.partsUsed, 15) // Reduced from 25
+        yPos += 1 // Reduced from 2
       }
 
       // ========================================
@@ -746,16 +745,16 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       drawSectionHeader('Follow-Up')
       drawField('Follow-up Required', formData.followUpRequired)
 
-      yPos += 4
+      yPos += 2 // Reduced from 4
 
       // ========================================
       // SIGNATURES
       // ========================================
       drawSectionHeader('Sign-Off')
 
-      checkNewPage(50)
+      checkNewPage(25) // Reduced from 50
 
-      const sigBoxHeight = 30
+      const sigBoxHeight = 20 // Reduced from 30
       const sigBoxWidth = (pageWidth - 2 * margin - 4) / 2
 
       // Customer signature box
@@ -765,27 +764,27 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       doc.setLineWidth(0.2)
       doc.rect(margin, yPos, sigBoxWidth, sigBoxHeight)
 
-      doc.setFontSize(8)
+      doc.setFontSize(7) // Reduced from 8
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(...darkGray)
-      doc.text('Customer Signature', margin + 2, yPos + 4)
+      doc.text('Customer Signature', margin + 2, yPos + 3)
 
       // Add signature or name
       if (signatureData) {
         try {
-          doc.addImage(signatureData, 'PNG', margin + 5, yPos + 10, 50, 15)
+          doc.addImage(signatureData, 'PNG', margin + 5, yPos + 7, 40, 10) // Reduced size
         } catch (err) {
           console.error('Error adding signature:', err)
-          doc.setFontSize(10)
+          doc.setFontSize(9) // Reduced from 10
           doc.setFont('helvetica', 'normal')
           doc.setTextColor(0, 0, 0)
-          doc.text(formData.customerName || '', margin + 3, yPos + 18)
+          doc.text(formData.customerName || '', margin + 3, yPos + 13)
         }
       } else {
-        doc.setFontSize(10)
+        doc.setFontSize(9) // Reduced from 10
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(0, 0, 0)
-        doc.text(formData.customerName || '', margin + 3, yPos + 18)
+        doc.text(formData.customerName || '', margin + 3, yPos + 13)
       }
 
       // Engineer signature box
@@ -795,15 +794,15 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       doc.setDrawColor(...borderColor)
       doc.rect(rightBoxX, yPos, sigBoxWidth, sigBoxHeight)
 
-      doc.setFontSize(8)
+      doc.setFontSize(7) // Reduced from 8
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(...darkGray)
-      doc.text('Engineer', rightBoxX + 2, yPos + 4)
+      doc.text('Engineer', rightBoxX + 2, yPos + 3)
 
-      doc.setFontSize(10)
+      doc.setFontSize(9) // Reduced from 10
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(0, 0, 0)
-      doc.text(formData.engineerName || '', rightBoxX + 3, yPos + 18)
+      doc.text(formData.engineerName || '', rightBoxX + 3, yPos + 13)
 
       yPos += sigBoxHeight + 2
 
@@ -984,6 +983,17 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
             </div>
           </div>
           <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="systemType">System Type (Optional)</label>
+              <input
+                type="text"
+                id="systemType"
+                name="systemType"
+                value={formData.systemType}
+                onChange={handleInputChange}
+                placeholder="e.g., Fire Alarm, HVAC, Electrical Panel"
+              />
+            </div>
             <div className="form-group">
               <label htmlFor="siteContactName">Site Contact Name (Optional)</label>
               <input

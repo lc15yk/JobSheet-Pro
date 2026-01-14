@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase, checkSubscription } from '../lib/supabase'
+import { metaPixelEvents } from '../lib/metaPixel'
 import './Settings.css'
 import ReportHistory from './ReportHistory'
 import SubscriptionBanner from './SubscriptionBanner'
@@ -11,6 +12,13 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChang
   const [subscription, setSubscription] = useState(null)
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState(null)
+
+  // Track when user views subscription page
+  useEffect(() => {
+    if (currentScreen === 'subscription') {
+      metaPixelEvents.viewSubscription()
+    }
+  }, [currentScreen])
 
   // Appearance settings
   const [theme, setTheme] = useState(() => {

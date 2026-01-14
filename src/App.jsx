@@ -11,6 +11,7 @@ import ResetPassword from './components/ResetPassword'
 import ProtectedRoute from './components/ProtectedRoute'
 import SubscriptionBanner from './components/SubscriptionBanner'
 import { supabase } from './lib/supabase'
+import { initMetaPixel } from './lib/metaPixel'
 
 // Admin email - only this user can see Settings
 const ADMIN_EMAIL = 'lewisgeorgecopestake@gmail.com'
@@ -40,6 +41,11 @@ function MainApp() {
     const root = document.documentElement
     root.setAttribute('data-theme', savedTheme)
     root.setAttribute('data-color', savedColor)
+  }, [])
+
+  // Initialize Meta Pixel
+  useEffect(() => {
+    initMetaPixel()
   }, [])
 
   // Check if current user is admin

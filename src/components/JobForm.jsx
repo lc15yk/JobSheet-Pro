@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { metaPixelEvents } from '../lib/metaPixel'
 import './JobForm.css'
 
 function JobForm({ companySettings, hasAccess = true, subscriptionStatus = null, viewMode = 'paragraph' }) {
@@ -6,6 +7,7 @@ function JobForm({ companySettings, hasAccess = true, subscriptionStatus = null,
     clientName: '',
     location: '',
     siteName: '',
+    systemType: '',
     engineerName: localStorage.getItem('engineerName') || '',
     jobDate: new Date().toISOString().split('T')[0],
     timeArrival: '',
@@ -133,6 +135,9 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
       const data = await response.json()
       setGeneratedReport(data.report)
+
+      // Track report generation
+      metaPixelEvents.generateReport()
 
       // Save to history
       saveToHistory({
