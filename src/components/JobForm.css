@@ -460,7 +460,25 @@
 
   .radio-group {
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
+  }
+
+  .radio-label {
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .radio-label:has(input:checked) {
+    border-color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  .radio-label span {
+    font-size: 15px;
+    line-height: 1.4;
   }
 }
 
