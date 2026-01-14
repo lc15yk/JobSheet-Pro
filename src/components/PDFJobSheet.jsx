@@ -740,15 +740,20 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
           )
         }
 
-        // Battery readings
-        const batteries = []
-        if (formData.battery1AH) batteries.push(`Battery 1: ${formData.battery1AH}`)
-        if (formData.battery2AH) batteries.push(`Battery 2: ${formData.battery2AH}`)
-        if (formData.battery3AH) batteries.push(`Battery 3: ${formData.battery3AH}`)
-        if (formData.battery4AH) batteries.push(`Battery 4: ${formData.battery4AH}`)
-
-        if (batteries.length > 0) {
-          drawField('Battery Readings', batteries.join(' | '))
+        // Battery readings - display as individual boxes
+        if (formData.battery1AH || formData.battery2AH || formData.battery3AH || formData.battery4AH) {
+          drawFieldPair(
+            'Battery 1 AH',
+            formData.battery1AH || 'N/A',
+            'Battery 2 AH',
+            formData.battery2AH || 'N/A'
+          )
+          drawFieldPair(
+            'Battery 3 AH',
+            formData.battery3AH || 'N/A',
+            'Battery 4 AH',
+            formData.battery4AH || 'N/A'
+          )
         }
 
         yPos += 1
