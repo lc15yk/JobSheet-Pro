@@ -788,17 +788,19 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
           )
         }
 
-        // Battery readings - display as 4 boxes in one row
+        // Battery readings - display as 2x2 grid
         if (formData.battery1AH || formData.battery2AH || formData.battery3AH || formData.battery4AH) {
-          drawFieldQuad(
+          drawFieldPair(
             'Battery 1 AH',
-            formData.battery1AH,
+            formData.battery1AH || 'N/A',
             'Battery 2 AH',
-            formData.battery2AH,
+            formData.battery2AH || 'N/A'
+          )
+          drawFieldPair(
             'Battery 3 AH',
-            formData.battery3AH,
+            formData.battery3AH || 'N/A',
             'Battery 4 AH',
-            formData.battery4AH
+            formData.battery4AH || 'N/A'
           )
         }
 
