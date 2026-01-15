@@ -198,6 +198,7 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
 
     // Common system details (for all trades)
     systemType: '',
+    systemPanelType: '',
     systemMake: '',
     systemModel: '',
     systemSerial: '',
@@ -792,11 +793,14 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // ========================================
       // SYSTEM DETAILS (if any system info provided)
       // ========================================
-      if (formData.systemType || formData.systemSerialNumber || formData.systemInstallationDate) {
+      if (formData.systemType || formData.systemPanelType || formData.systemSerialNumber || formData.systemInstallationDate) {
         drawSectionHeader('System Details')
 
         if (formData.systemType && formData.systemType.trim()) {
           drawField('System Type', formData.systemType)
+        }
+        if (formData.systemPanelType && formData.systemPanelType.trim()) {
+          drawField('Panel Type', formData.systemPanelType)
         }
         if (formData.systemSerialNumber && formData.systemSerialNumber.trim()) {
           drawField('Serial Number', formData.systemSerialNumber)
@@ -1017,6 +1021,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         siteContactName: '',
         siteContactPhone: '',
         systemType: '',
+        systemPanelType: '',
         systemSerialNumber: '',
         systemInstallationDate: '',
         jobNumber: nextJobNumber,
@@ -1149,6 +1154,17 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
                 value={formData.systemType}
                 onChange={handleInputChange}
                 placeholder="e.g., Fire Alarm System to BS5839"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="systemPanelType">Panel Type (Optional)</label>
+              <input
+                type="text"
+                id="systemPanelType"
+                name="systemPanelType"
+                value={formData.systemPanelType}
+                onChange={handleInputChange}
+                placeholder="e.g., CTec 4 Zone"
               />
             </div>
             <div className="form-group">
