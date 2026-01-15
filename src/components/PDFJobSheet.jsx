@@ -606,6 +606,47 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         yPos += fieldHeight
       }
 
+      // Helper function to draw four fields in one row
+      const drawFieldQuad = (label1, value1, label2, value2, label3, value3, label4, value4) => {
+        const gap = 2
+        const fieldWidth = (pageWidth - 2 * margin - 3 * gap) / 4
+        const fieldHeight = 9
+
+        checkNewPage(fieldHeight)
+
+        const fields = [
+          { label: label1, value: value1, x: margin },
+          { label: label2, value: value2, x: margin + fieldWidth + gap },
+          { label: label3, value: value3, x: margin + 2 * (fieldWidth + gap) },
+          { label: label4, value: value4, x: margin + 3 * (fieldWidth + gap) }
+        ]
+
+        fields.forEach(field => {
+          // Background
+          doc.setFillColor(...lightGray)
+          doc.rect(field.x, yPos, fieldWidth, fieldHeight, 'F')
+
+          // Border
+          doc.setDrawColor(...borderColor)
+          doc.setLineWidth(0.2)
+          doc.rect(field.x, yPos, fieldWidth, fieldHeight)
+
+          // Label
+          doc.setFontSize(6)
+          doc.setFont('helvetica', 'bold')
+          doc.setTextColor(...darkGray)
+          doc.text(field.label, field.x + 1, yPos + 3)
+
+          // Value
+          doc.setFontSize(8)
+          doc.setFont('helvetica', 'normal')
+          doc.setTextColor(0, 0, 0)
+          doc.text(field.value || 'N/A', field.x + 1, yPos + 7)
+        })
+
+        yPos += fieldHeight
+      }
+
       // Helper function to draw section header
       const drawSectionHeader = (title) => {
         checkNewPage(8)
@@ -740,19 +781,17 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
           )
         }
 
-        // Battery readings - display as individual boxes
+        // Battery readings - display as 4 boxes in one row
         if (formData.battery1AH || formData.battery2AH || formData.battery3AH || formData.battery4AH) {
-          drawFieldPair(
+          drawFieldQuad(
             'Battery 1 AH',
-            formData.battery1AH || 'N/A',
+            formData.battery1AH,
             'Battery 2 AH',
-            formData.battery2AH || 'N/A'
-          )
-          drawFieldPair(
+            formData.battery2AH,
             'Battery 3 AH',
-            formData.battery3AH || 'N/A',
+            formData.battery3AH,
             'Battery 4 AH',
-            formData.battery4AH || 'N/A'
+            formData.battery4AH
           )
         }
 
