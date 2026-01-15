@@ -606,31 +606,38 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         yPos += fieldHeight
       }
 
-      // Helper function to draw four fields in one row
+      // Helper function to draw one box with 4 sections divided by vertical lines
       const drawFieldQuad = (label1, value1, label2, value2, label3, value3, label4, value4) => {
-        const gap = 3
-        const fieldWidth = (pageWidth - 2 * margin - 3 * gap) / 4
+        const totalWidth = pageWidth - 2 * margin
+        const sectionWidth = totalWidth / 4
         const fieldHeight = 10
 
         checkNewPage(fieldHeight)
 
+        // Draw the main box background
+        doc.setFillColor(...lightGray)
+        doc.rect(margin, yPos, totalWidth, fieldHeight, 'F')
+
+        // Draw the outer border
+        doc.setDrawColor(...borderColor)
+        doc.setLineWidth(0.2)
+        doc.rect(margin, yPos, totalWidth, fieldHeight)
+
+        // Draw vertical dividers between sections
+        for (let i = 1; i < 4; i++) {
+          const dividerX = margin + (sectionWidth * i)
+          doc.line(dividerX, yPos, dividerX, yPos + fieldHeight)
+        }
+
+        // Add content to each section
         const fields = [
           { label: label1, value: value1, x: margin },
-          { label: label2, value: value2, x: margin + fieldWidth + gap },
-          { label: label3, value: value3, x: margin + 2 * (fieldWidth + gap) },
-          { label: label4, value: value4, x: margin + 3 * (fieldWidth + gap) }
+          { label: label2, value: value2, x: margin + sectionWidth },
+          { label: label3, value: value3, x: margin + sectionWidth * 2 },
+          { label: label4, value: value4, x: margin + sectionWidth * 3 }
         ]
 
         fields.forEach(field => {
-          // Background
-          doc.setFillColor(...lightGray)
-          doc.rect(field.x, yPos, fieldWidth, fieldHeight, 'F')
-
-          // Border
-          doc.setDrawColor(...borderColor)
-          doc.setLineWidth(0.2)
-          doc.rect(field.x, yPos, fieldWidth, fieldHeight)
-
           // Label
           doc.setFontSize(7)
           doc.setFont('helvetica', 'bold')
