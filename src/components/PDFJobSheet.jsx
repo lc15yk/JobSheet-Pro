@@ -711,41 +711,50 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // Add watermark to first page
       addWatermark()
 
-      // Header background bar
-      doc.setFillColor(...primaryColor)
-      doc.rect(0, 0, pageWidth, 28, 'F') // Reduced from 35
+      // No background bar - clean white header
 
-      // Company Logo (if available)
+      // Company details (top left corner)
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(40, 40, 40)
+      let leftY = margin + 5
+
+      if (companySettings.companyName) {
+        doc.text(companySettings.companyName, margin, leftY)
+        leftY += 4
+      }
+
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(60, 60, 60)
+
+      if (companySettings.contactPhone) {
+        doc.text(`Tel: ${companySettings.contactPhone}`, margin, leftY)
+        leftY += 3.5
+      }
+      if (companySettings.contactEmail) {
+        doc.text(companySettings.contactEmail, margin, leftY)
+        leftY += 3.5
+      }
+
+      // Company Logo (top right corner)
       if (companySettings.logo) {
         try {
-          doc.addImage(companySettings.logo, 'PNG', margin, 6, 25, 12) // Reduced size
+          const logoSize = 20
+          doc.addImage(companySettings.logo, 'PNG', pageWidth - margin - logoSize, margin + 2, logoSize, logoSize)
         } catch (err) {
           console.error('Error adding logo:', err)
         }
       }
 
-      // Document Title - Company Name
-      doc.setFontSize(14) // Reduced from 18
+      // Document Title (centered, below company info)
+      yPos = Math.max(leftY + 5, margin + 30)
+      doc.setFontSize(14)
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(40, 40, 40)
-      doc.text(companySettings.companyName || 'JOB SHEET', pageWidth / 2, 14, { align: 'center' })
+      doc.text('JOB SHEET', pageWidth / 2, yPos, { align: 'center' })
 
-      // Company info (top right)
-      doc.setFontSize(7) // Reduced from 8
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(60, 60, 60)
-      const rightX = pageWidth - margin
-      let headerY = 8
-
-      if (companySettings.contactPhone) {
-        doc.text(companySettings.contactPhone, rightX, headerY, { align: 'right' })
-        headerY += 3.5
-      }
-      if (companySettings.contactEmail) {
-        doc.text(companySettings.contactEmail, rightX, headerY, { align: 'right' })
-      }
-
-      yPos = 32 // Reduced from 42
+      yPos += 8
 
       // ========================================
       // JOB INFORMATION
