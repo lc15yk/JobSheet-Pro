@@ -201,6 +201,8 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
     systemMake: '',
     systemModel: '',
     systemSerial: '',
+    systemSerialNumber: '',
+    systemInstallationDate: '',
     lastServiceDate: '',
     nextServiceDue: '',
 
@@ -783,12 +785,28 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
       drawField('Site Name', formData.customerCompanyName || 'N/A')
       drawField('Site Address', formData.siteAddress || 'N/A')
-      if (formData.systemType && formData.systemType.trim()) {
-        drawField('System Type', formData.systemType)
-      }
       drawFieldPair('Contact Name', formData.siteContactName || 'N/A', 'Contact Phone', formData.siteContactPhone || 'N/A')
 
       yPos += 1 // Reduced from 2
+
+      // ========================================
+      // SYSTEM DETAILS (if any system info provided)
+      // ========================================
+      if (formData.systemType || formData.systemSerialNumber || formData.systemInstallationDate) {
+        drawSectionHeader('System Details')
+
+        if (formData.systemType && formData.systemType.trim()) {
+          drawField('System Type', formData.systemType)
+        }
+        if (formData.systemSerialNumber && formData.systemSerialNumber.trim()) {
+          drawField('Serial Number', formData.systemSerialNumber)
+        }
+        if (formData.systemInstallationDate && formData.systemInstallationDate.trim()) {
+          drawField('Installation Date', formData.systemInstallationDate)
+        }
+
+        yPos += 1
+      }
 
       // ========================================
       // SERVICING DETAILS (only for Service job type)
@@ -998,6 +1016,9 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         siteAddress: '',
         siteContactName: '',
         siteContactPhone: '',
+        systemType: '',
+        systemSerialNumber: '',
+        systemInstallationDate: '',
         jobNumber: nextJobNumber,
         jobDate: new Date().toISOString().split('T')[0],
         timeIn: '',
@@ -1091,17 +1112,6 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="systemType">System Type (Optional)</label>
-              <input
-                type="text"
-                id="systemType"
-                name="systemType"
-                value={formData.systemType}
-                onChange={handleInputChange}
-                placeholder="e.g., Fire Alarm, HVAC, Electrical Panel"
-              />
-            </div>
-            <div className="form-group">
               <label htmlFor="siteContactName">Site Contact Name (Optional)</label>
               <input
                 type="text"
@@ -1121,6 +1131,45 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
                 value={formData.siteContactPhone}
                 onChange={handleInputChange}
                 placeholder="e.g., 07123 456789"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 2.5️⃣ SYSTEM DETAILS */}
+        <div className="form-section">
+          <h3 className="section-title">⚙️ System Details</h3>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="systemType">System Type (Optional)</label>
+              <input
+                type="text"
+                id="systemType"
+                name="systemType"
+                value={formData.systemType}
+                onChange={handleInputChange}
+                placeholder="e.g., Fire Alarm System to BS5839"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="systemSerialNumber">Serial Number (Optional)</label>
+              <input
+                type="text"
+                id="systemSerialNumber"
+                name="systemSerialNumber"
+                value={formData.systemSerialNumber}
+                onChange={handleInputChange}
+                placeholder="e.g., 730210"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="systemInstallationDate">Installation Date (Optional)</label>
+              <input
+                type="date"
+                id="systemInstallationDate"
+                name="systemInstallationDate"
+                value={formData.systemInstallationDate}
+                onChange={handleInputChange}
               />
             </div>
           </div>
