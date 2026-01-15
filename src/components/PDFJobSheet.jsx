@@ -1164,7 +1164,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
                 name="systemPanelType"
                 value={formData.systemPanelType}
                 onChange={handleInputChange}
-                placeholder="e.g., CTec 4 Zone"
+                placeholder="e.g., CTec"
               />
             </div>
             <div className="form-group">
