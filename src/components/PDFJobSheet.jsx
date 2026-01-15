@@ -608,9 +608,9 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
       // Helper function to draw four fields in one row
       const drawFieldQuad = (label1, value1, label2, value2, label3, value3, label4, value4) => {
-        const gap = 2
+        const gap = 3
         const fieldWidth = (pageWidth - 2 * margin - 3 * gap) / 4
-        const fieldHeight = 9
+        const fieldHeight = 10
 
         checkNewPage(fieldHeight)
 
@@ -632,16 +632,16 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
           doc.rect(field.x, yPos, fieldWidth, fieldHeight)
 
           // Label
-          doc.setFontSize(6)
+          doc.setFontSize(7)
           doc.setFont('helvetica', 'bold')
           doc.setTextColor(...darkGray)
-          doc.text(field.label, field.x + 1, yPos + 3)
+          doc.text(field.label, field.x + 2, yPos + 3.5)
 
           // Value
-          doc.setFontSize(8)
+          doc.setFontSize(9)
           doc.setFont('helvetica', 'normal')
           doc.setTextColor(0, 0, 0)
-          doc.text(field.value || 'N/A', field.x + 1, yPos + 7)
+          doc.text(field.value || 'N/A', field.x + 2, yPos + 7.5)
         })
 
         yPos += fieldHeight
