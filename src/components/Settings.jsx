@@ -271,6 +271,28 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChang
             />
           </div>
 
+          <div className="form-group">
+            <label>Address</label>
+            <input
+              type="text"
+              name="companyAddress"
+              value={formData.companyAddress || ''}
+              onChange={handleChange}
+              placeholder="e.g., 22 Hosie Rigg"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Location</label>
+            <input
+              type="text"
+              name="companyLocation"
+              value={formData.companyLocation || ''}
+              onChange={handleChange}
+              placeholder="e.g., Edinburgh, EH15 3RX"
+            />
+          </div>
+
           <div className="form-row">
             <div className="form-group">
               <label>Contact Email</label>

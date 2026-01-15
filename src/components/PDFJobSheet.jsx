@@ -728,6 +728,14 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(60, 60, 60)
 
+      if (companySettings.companyAddress) {
+        doc.text(companySettings.companyAddress, margin, leftY)
+        leftY += 3.5
+      }
+      if (companySettings.companyLocation) {
+        doc.text(companySettings.companyLocation, margin, leftY)
+        leftY += 3.5
+      }
       if (companySettings.contactPhone) {
         doc.text(`Tel: ${companySettings.contactPhone}`, margin, leftY)
         leftY += 3.5

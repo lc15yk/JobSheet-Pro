@@ -26,6 +26,8 @@ function MainApp() {
     const saved = localStorage.getItem('companySettings')
     return saved ? JSON.parse(saved) : {
       companyName: '',
+      companyAddress: '',
+      companyLocation: '',
       contactEmail: '',
       contactPhone: '',
       logo: null,
