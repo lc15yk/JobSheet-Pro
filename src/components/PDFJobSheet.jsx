@@ -1181,11 +1181,12 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
             <div className="form-group">
               <label htmlFor="systemInstallationDate">Installation Date (Optional)</label>
               <input
-                type="date"
+                type="text"
                 id="systemInstallationDate"
                 name="systemInstallationDate"
                 value={formData.systemInstallationDate}
                 onChange={handleInputChange}
+                placeholder="e.g., 15/02/2019"
               />
             </div>
           </div>
