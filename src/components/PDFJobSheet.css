@@ -197,6 +197,44 @@
   font-weight: 500;
 }
 
+/* Button Styles */
+.btn-primary {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--accent-secondary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(118, 75, 162, 0.3);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+  opacity: 0.9;
+}
+
 /* Generate PDF Button */
 .generate-pdf-btn {
   padding: 18px 40px;
@@ -475,6 +513,14 @@
 
   .clear-signature-btn {
     width: 100%;
+  }
+
+  /* Custom fields mobile optimization */
+  .btn-secondary,
+  .btn-primary {
+    width: 100%;
+    min-height: 44px;
+    font-size: 16px !important;
   }
 
   /* Fix time input fields on mobile - CRITICAL FIX */

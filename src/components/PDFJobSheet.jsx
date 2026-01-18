@@ -232,6 +232,20 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
   const [isEnhancing, setIsEnhancing] = useState(false) // Track AI enhancement state
   const canvasRef = useRef(null)
 
+  // Custom fields state - load from localStorage on init
+  const [customFields, setCustomFields] = useState(() => {
+    const saved = localStorage.getItem('customFieldDefinitions')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [showAddFieldModal, setShowAddFieldModal] = useState(false)
+  const [newFieldName, setNewFieldName] = useState('')
+  const [newFieldType, setNewFieldType] = useState('text')
+
+  // Save custom field definitions to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('customFieldDefinitions', JSON.stringify(customFields))
+  }, [customFields])
+
   // Initialize canvas with white background
   useEffect(() => {
     const canvas = canvasRef.current
@@ -265,6 +279,38 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
     if (name === 'engineerName') {
       localStorage.setItem('engineerName', value)
     }
+  }
+
+  // Custom field handlers
+  const handleAddCustomField = () => {
+    if (!newFieldName.trim()) {
+      alert('Please enter a field name')
+      return
+    }
+
+    const newField = {
+      id: Date.now(),
+      name: newFieldName.trim(),
+      type: newFieldType,
+      value: ''
+    }
+
+    setCustomFields(prev => [...prev, newField])
+    setNewFieldName('')
+    setNewFieldType('text')
+    setShowAddFieldModal(false)
+  }
+
+  const handleRemoveCustomField = (fieldId) => {
+    setCustomFields(prev => prev.filter(field => field.id !== fieldId))
+  }
+
+  const handleCustomFieldChange = (fieldId, value) => {
+    setCustomFields(prev =>
+      prev.map(field =>
+        field.id === fieldId ? { ...field, value } : field
+      )
+    )
   }
 
   // Generate AI-enhanced description for PDF (called during PDF generation)
@@ -525,10 +571,9 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // Helper function to check if we need a new page
       const checkNewPage = (requiredSpace = 20) => {
         if (yPos + requiredSpace > pageHeight - margin - 10) {
-          addWatermark() // Add watermark before creating new page
           doc.addPage()
-          yPos = margin
           addWatermark() // Add watermark to new page
+          yPos = margin
           return true
         }
         return false
@@ -567,7 +612,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
       // Helper function to draw two fields side by side
       const drawFieldPair = (label1, value1, label2, value2) => {
-        const fieldWidth = (pageWidth - 2 * margin - 4) / 2
+        const fieldWidth = (pageWidth - 2 * margin) / 2
         const fieldHeight = 9 // Reduced from 12
 
         checkNewPage(fieldHeight)
@@ -590,7 +635,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         doc.text(value1 || '', margin + 2, yPos + 7)
 
         // Right field
-        const rightX = margin + fieldWidth + 4
+        const rightX = margin + fieldWidth
         doc.setFillColor(...lightGray)
         doc.rect(rightX, yPos, fieldWidth, fieldHeight, 'F')
         doc.setDrawColor(...borderColor)
@@ -661,7 +706,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       const drawSectionHeader = (title) => {
         checkNewPage(8)
 
-        yPos += 2 // Reduced from 3
+        yPos += 0.5 // Minimal gap before section header
 
         doc.setFillColor(...primaryColor)
         doc.rect(margin, yPos, pageWidth - 2 * margin, 6, 'F') // Reduced from 8
@@ -686,11 +731,11 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         const lineHeight = 4 // Reduced from 5
         const textHeight = Math.max(lines.length * lineHeight + 6, minHeight) // Reduced padding from 8 to 6
 
-        // Check again with actual height
-        if (yPos + textHeight > pageHeight - margin - 10) {
-          doc.addPage()
-          yPos = margin
-        }
+        // DISABLED: Keep everything on 1 page
+        // if (yPos + textHeight > pageHeight - margin - 10) {
+        //   doc.addPage()
+        //   yPos = margin
+        // }
 
         // Draw box with light background
         doc.setFillColor(255, 255, 255)
@@ -758,14 +803,8 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         }
       }
 
-      // Document Title (centered, below company info)
+      // Document Title removed - start content directly
       yPos = Math.max(leftY + 5, margin + 30)
-      doc.setFontSize(14)
-      doc.setFont('helvetica', 'bold')
-      doc.setTextColor(40, 40, 40)
-      doc.text('JOB SHEET', pageWidth / 2, yPos, { align: 'center' })
-
-      yPos += 8
 
       // ========================================
       // JOB INFORMATION
@@ -774,21 +813,15 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
       drawFieldPair('Job Reference', formData.jobNumber || 'N/A', 'Date', formData.jobDate)
       drawFieldPair('Time In', formData.timeIn || 'N/A', 'Time Out', formData.timeOut || 'N/A')
-      drawField('Job Type', formData.jobType)
-      drawField('Engineer', formData.engineerName || 'N/A')
-
-      yPos += 1 // Reduced from 2
+      drawFieldPair('Job Type', formData.jobType, 'Engineer', formData.engineerName || 'N/A')
 
       // ========================================
       // SITE DETAILS
       // ========================================
       drawSectionHeader('Site Details')
 
-      drawField('Site Name', formData.customerCompanyName || 'N/A')
-      drawField('Site Address', formData.siteAddress || 'N/A')
+      drawFieldPair('Site Name', formData.customerCompanyName || 'N/A', 'Site Address', formData.siteAddress || 'N/A')
       drawFieldPair('Contact Name', formData.siteContactName || 'N/A', 'Contact Phone', formData.siteContactPhone || 'N/A')
-
-      yPos += 1 // Reduced from 2
 
       // ========================================
       // SYSTEM DETAILS (if any system info provided)
@@ -796,20 +829,59 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       if (formData.systemType || formData.systemPanelType || formData.systemSerialNumber || formData.systemInstallationDate) {
         drawSectionHeader('System Details')
 
+        // Collect filled system fields
+        const systemFields = []
         if (formData.systemType && formData.systemType.trim()) {
-          drawField('System Type', formData.systemType)
+          systemFields.push({ label: 'System Type', value: formData.systemType })
         }
         if (formData.systemPanelType && formData.systemPanelType.trim()) {
-          drawField('Panel Type', formData.systemPanelType)
+          systemFields.push({ label: 'Panel Type', value: formData.systemPanelType })
         }
         if (formData.systemSerialNumber && formData.systemSerialNumber.trim()) {
-          drawField('Serial Number', formData.systemSerialNumber)
+          systemFields.push({ label: 'Serial Number', value: formData.systemSerialNumber })
         }
         if (formData.systemInstallationDate && formData.systemInstallationDate.trim()) {
-          drawField('Installation Date', formData.systemInstallationDate)
+          systemFields.push({ label: 'Installation Date', value: formData.systemInstallationDate })
         }
 
-        yPos += 1
+        // Display system fields in pairs (2 per row)
+        for (let i = 0; i < systemFields.length; i += 2) {
+          const field1 = systemFields[i]
+          const field2 = systemFields[i + 1]
+
+          if (field2) {
+            // Draw two fields side by side
+            drawFieldPair(field1.label, field1.value, field2.label, field2.value)
+          } else {
+            // Draw single field if it's the last one and odd
+            drawField(field1.label, field1.value)
+          }
+        }
+      }
+
+      // ========================================
+      // CUSTOM FIELDS (if any)
+      // ========================================
+      if (customFields.length > 0) {
+        const filledCustomFields = customFields.filter(field => field.value && field.value.trim())
+
+        if (filledCustomFields.length > 0) {
+          drawSectionHeader('Additional Details')
+
+          // Display custom fields in pairs (2 per row)
+          for (let i = 0; i < filledCustomFields.length; i += 2) {
+            const field1 = filledCustomFields[i]
+            const field2 = filledCustomFields[i + 1]
+
+            if (field2) {
+              // Draw two fields side by side
+              drawFieldPair(field1.name, field1.value, field2.name, field2.value)
+            } else {
+              // Draw single field if it's the last one and odd
+              drawField(field1.name, field1.value)
+            }
+          }
+        }
       }
 
       // ========================================
@@ -842,8 +914,6 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
             formData.battery4AH || 'N/A'
           )
         }
-
-        yPos += 1
       }
 
       // ========================================
@@ -857,15 +927,12 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       drawSectionHeader('Work Carried Out')
       drawTextArea(workDescription || 'No work description provided', 30) // Reduced from 50
 
-      yPos += 1 // Reduced from 2
-
       // ========================================
       // PARTS USED (if any)
       // ========================================
       if (formData.partsUsed && formData.partsUsed.trim()) {
         drawSectionHeader('Parts & Materials Used')
         drawTextArea(formData.partsUsed, 15) // Reduced from 25
-        yPos += 1 // Reduced from 2
       }
 
       // ========================================
@@ -873,8 +940,6 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // ========================================
       drawSectionHeader('Follow-Up')
       drawField('Follow-up Required', formData.followUpRequired)
-
-      yPos += 2 // Reduced from 4
 
       // ========================================
       // SIGNATURES
@@ -1046,6 +1111,9 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         ctx.fillRect(0, 0, canvas.width, canvas.height)
       }
 
+      // Clear custom field values but keep the field definitions
+      setCustomFields(prev => prev.map(field => ({ ...field, value: '' })))
+
       alert('✅ PDF generated successfully! Find it in Settings → Report History')
     } catch (error) {
       console.error('Error generating PDF:', error)
@@ -1191,6 +1259,194 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
             </div>
           </div>
         </div>
+
+        {/* CUSTOM FIELDS */}
+        <div className="form-section">
+          <h3 className="section-title">Custom Fields</h3>
+          <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '15px' }}>
+            Add your own custom fields that will appear on the PDF report
+          </p>
+
+          {/* Add Field Button */}
+          <button
+            type="button"
+            onClick={() => setShowAddFieldModal(true)}
+            className="btn-secondary"
+            style={{
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: '100%'
+            }}
+          >
+            <span style={{ fontSize: '18px' }}>+</span> Add Custom Field
+          </button>
+
+          {/* Custom Fields List */}
+          {customFields.length > 0 && (
+            <div className="form-row" style={{ flexDirection: 'column', gap: '0' }}>
+              {customFields.map(field => (
+                <div key={field.id} className="form-group" style={{ position: 'relative' }}>
+                  <label htmlFor={`custom-field-${field.id}`}>
+                    {field.name}
+                  </label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <input
+                      type={field.type}
+                      id={`custom-field-${field.id}`}
+                      name={`custom-field-${field.id}`}
+                      value={field.value}
+                      onChange={(e) => handleCustomFieldChange(field.id, e.target.value)}
+                      placeholder={`Enter ${field.name.toLowerCase()}`}
+                      style={{ flex: 1 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCustomField(field.id)}
+                      style={{
+                        backgroundColor: '#ff4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        minWidth: '44px',
+                        minHeight: '44px',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      title="Remove field"
+                      aria-label="Remove field"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {customFields.length === 0 && (
+            <p style={{
+              fontSize: '0.85rem',
+              color: '#999',
+              fontStyle: 'italic',
+              textAlign: 'center',
+              padding: '20px'
+            }}>
+              No custom fields added yet. Click "Add Custom Field" to create one.
+            </p>
+          )}
+        </div>
+
+        {/* Add Field Modal */}
+        {showAddFieldModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              padding: 'clamp(20px, 5vw, 30px)',
+              borderRadius: '12px',
+              maxWidth: '400px',
+              width: '100%',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}>
+              <h3 style={{ marginTop: 0, fontSize: 'clamp(1.2rem, 4vw, 1.5rem)' }}>Add Custom Field</h3>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>
+                  Field Name *
+                </label>
+                <input
+                  type="text"
+                  value={newFieldName}
+                  onChange={(e) => setNewFieldName(e.target.value)}
+                  placeholder="e.g., Panel Type, Battery Voltage"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #ddd',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    boxSizing: 'border-box'
+                  }}
+                  autoFocus
+                />
+              </div>
+
+              <div style={{ marginBottom: '25px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>
+                  Field Type
+                </label>
+                <select
+                  value={newFieldType}
+                  onChange={(e) => setNewFieldType(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #ddd',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <option value="text">Text</option>
+                  <option value="number">Number</option>
+                  <option value="date">Date</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddFieldModal(false)
+                    setNewFieldName('')
+                    setNewFieldType('text')
+                  }}
+                  className="btn-secondary"
+                  style={{
+                    flex: '1 1 120px',
+                    minHeight: '44px',
+                    fontSize: '16px'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddCustomField}
+                  className="btn-primary"
+                  style={{
+                    flex: '1 1 120px',
+                    minHeight: '44px',
+                    fontSize: '16px'
+                  }}
+                >
+                  Add Field
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 3️⃣ JOB DETAILS */}
         <div className="form-section">
