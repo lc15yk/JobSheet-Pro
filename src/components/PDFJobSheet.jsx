@@ -210,6 +210,7 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
     // Servicing-specific fields
     dateOfPreviousInspection: '',
     dateOfNextInspection: '',
+    overallCondition: '', // Pass / Fail / N/A
     battery1AH: '',
     battery2AH: '',
     battery3AH: '',
@@ -914,6 +915,11 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
             formData.battery4AH || 'N/A'
           )
         }
+
+        // Overall Condition - at the end
+        if (formData.overallCondition) {
+          drawField('Overall Condition of System', formData.overallCondition)
+        }
       }
 
       // ========================================
@@ -1095,6 +1101,13 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         timeOut: '',
         engineerName: localStorage.getItem('engineerName') || '',
         jobType: 'Call-out',
+        dateOfPreviousInspection: '',
+        dateOfNextInspection: '',
+        overallCondition: '',
+        battery1AH: '',
+        battery2AH: '',
+        battery3AH: '',
+        battery4AH: '',
         workCompleted: '',
         partsUsed: '',
         followUpRequired: 'No',
@@ -1568,6 +1581,20 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
             <div className="form-row">
               <div className="form-group">
+                <label htmlFor="overallCondition">Overall Condition of System</label>
+                <select
+                  id="overallCondition"
+                  name="overallCondition"
+                  value={formData.overallCondition}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select condition...</option>
+                  <option value="Pass">Pass</option>
+                  <option value="Fail">Fail</option>
+                  <option value="N/A">N/A</option>
+                </select>
+              </div>
+              <div className="form-group">
                 <label htmlFor="battery1AH">Battery 1 AH</label>
                 <input
                   type="text"
@@ -1578,6 +1605,9 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
                   placeholder="e.g., 12AH"
                 />
               </div>
+            </div>
+
+            <div className="form-row">
               <div className="form-group">
                 <label htmlFor="battery2AH">Battery 2 AH</label>
                 <input
@@ -1589,9 +1619,6 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
                   placeholder="e.g., 12AH"
                 />
               </div>
-            </div>
-
-            <div className="form-row">
               <div className="form-group">
                 <label htmlFor="battery3AH">Battery 3 AH</label>
                 <input
@@ -1603,6 +1630,9 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
                   placeholder="e.g., 12AH"
                 />
               </div>
+            </div>
+
+            <div className="form-row">
               <div className="form-group">
                 <label htmlFor="battery4AH">Battery 4 AH</label>
                 <input
