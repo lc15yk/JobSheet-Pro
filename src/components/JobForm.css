@@ -439,6 +439,7 @@
     padding: 18px 30px;
     font-size: 1rem;
     margin: 30px 20px;
+    width: calc(100% - 40px);
   }
 
   .report-output {
