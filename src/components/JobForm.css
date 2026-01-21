@@ -284,7 +284,6 @@
 }
 
 .generate-btn {
-  width: 100%;
   background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   color: white;
   border: none;
@@ -294,12 +293,10 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
-  margin: 40px 40px 40px 40px;
+  margin: 40px;
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+  display: block;
+  width: calc(100% - 80px);
 }
 
 .generate-btn:hover:not(:disabled) {

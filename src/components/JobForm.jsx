@@ -285,17 +285,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         </div>
 
         <button type="submit" className="generate-btn" disabled={isGenerating}>
-          {isGenerating ? (
-            <>
-              <span className="btn-icon">⏳</span>
-              <span>Generating Report...</span>
-            </>
-          ) : (
-            <>
-              <span className="btn-icon">✨</span>
-              <span>Generate Report</span>
-            </>
-          )}
+          {isGenerating ? 'Generating Report...' : 'Generate Report'}
         </button>
       </form>
 
@@ -305,7 +295,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
           <div className="report-header">
             <h3>Your Professional Report</h3>
             <button onClick={copyToClipboard} className="copy-btn">
-              📋 Copy to Clipboard
+              Copy to Clipboard
             </button>
           </div>
           <div className="report-content">
