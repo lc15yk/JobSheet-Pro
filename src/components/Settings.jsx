@@ -160,6 +160,9 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChang
           <button type="button" className="menu-button" onClick={() => setCurrentScreen('subscription')}>
             Subscription <span className="arrow">›</span>
           </button>
+          <button type="button" className="menu-button" onClick={() => setCurrentScreen('trade')}>
+            Trade / Industry <span className="arrow">›</span>
+          </button>
           <button type="button" className="menu-button" onClick={() => setCurrentScreen('company')}>
             Company <span className="arrow">›</span>
           </button>
@@ -186,6 +189,7 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChang
   const screenTitles = {
     account: 'Account',
     subscription: 'Subscription',
+    trade: 'Trade / Industry',
     company: 'Company Settings',
     history: 'Report History',
     appearance: 'Display & Appearance'
@@ -232,34 +236,46 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChang
         </div>
       )}
 
+      {currentScreen === 'trade' && (
+        <div className="settings-screen">
+          <div style={{
+            padding: '40px 20px',
+            borderRadius: '12px',
+            border: '2px dashed var(--border-color)',
+            background: 'var(--bg-secondary)',
+            textAlign: 'center',
+            maxWidth: '500px',
+            margin: '0 auto'
+          }}>
+            <p style={{
+              fontSize: '3rem',
+              marginBottom: '15px'
+            }}>
+              🚀
+            </p>
+            <p style={{
+              fontSize: '1.3rem',
+              color: 'var(--accent-color)',
+              fontWeight: '600',
+              marginBottom: '10px'
+            }}>
+              Coming Soon!
+            </p>
+            <p style={{
+              fontSize: '1rem',
+              color: 'var(--text-secondary)',
+              lineHeight: '1.6'
+            }}>
+              Trade-specific fields and customization options are currently in development.
+              <br />
+              Stay tuned for updates!
+            </p>
+          </div>
+        </div>
+      )}
+
       {currentScreen === 'company' && (
         <form onSubmit={handleSubmit} className="settings-form">
-          <div className="form-group">
-            <label>Trade / Industry</label>
-            <div style={{
-              padding: '20px',
-              borderRadius: '8px',
-              border: '2px dashed var(--border-color)',
-              background: 'var(--bg-secondary)',
-              textAlign: 'center'
-            }}>
-              <p style={{
-                fontSize: '1.1rem',
-                color: 'var(--accent-color)',
-                fontWeight: '600',
-                marginBottom: '5px'
-              }}>
-                Coming Soon! 🚀
-              </p>
-              <p style={{
-                fontSize: '0.9rem',
-                color: 'var(--text-tertiary)'
-              }}>
-                Trade-specific fields are currently in development
-              </p>
-            </div>
-          </div>
-
           <div className="form-group">
             <label>Company Name</label>
             <input
@@ -320,9 +336,29 @@ function Settings({ settings, onSave, onCancel, onLogout, isAdmin, onAccessChang
             <label>Company Logo (Optional)</label>
             <input type="file" accept="image/*" onChange={handleLogoUpload} className="file-input" />
             {formData.logo && (
-              <div className="logo-preview">
+              <div className="logo-preview" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <img src={formData.logo} alt="Company logo" />
               </div>
+            )}
+            {formData.logo && (
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, logo: null }))}
+                style={{
+                  marginTop: '15px',
+                  padding: '10px 20px',
+                  background: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  width: '100%'
+                }}
+              >
+                Remove Logo
+              </button>
             )}
           </div>
 

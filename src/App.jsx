@@ -32,7 +32,7 @@ function MainApp() {
       contactPhone: '',
       logo: null,
       openaiApiKey: '', // OpenAI API key - user needs to add their own
-      trade: 'general' // Trade/industry type
+      trade: '' // Trade/industry type
     }
   })
 
