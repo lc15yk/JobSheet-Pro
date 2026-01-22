@@ -1,8 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { metaPixelEvents } from '../lib/metaPixel'
 import './JobForm.css'
 
 function JobForm({ companySettings, hasAccess = true, subscriptionStatus = null, viewMode = 'paragraph' }) {
+  // Check if user has seen the example before
+  const hasSeenExample = localStorage.getItem('hasSeenParagraphExample') === 'true'
+
+  // Example text for first-time users
+  const exampleText = "Attended site following report of fault on fire alarm system. Identified failed smoke detector in kitchen area. Replaced device and tested system. All devices operating correctly at time of visit."
+
   const [formData, setFormData] = useState({
     clientName: '',
     location: '',
@@ -14,12 +20,13 @@ function JobForm({ companySettings, hasAccess = true, subscriptionStatus = null,
     timeDeparture: ''
   })
 
-  const [workDescription, setWorkDescription] = useState('')
+  const [workDescription, setWorkDescription] = useState(hasSeenExample ? '' : exampleText)
   const [additionalNotes, setAdditionalNotes] = useState('')
   const [detailLevel, setDetailLevel] = useState('standard') // 'brief', 'standard', 'detailed'
 
   const [generatedReport, setGeneratedReport] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [showExampleBanner, setShowExampleBanner] = useState(!hasSeenExample)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -136,6 +143,12 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       const data = await response.json()
       setGeneratedReport(data.report)
 
+      // Mark that user has seen the example (first-time only)
+      if (showExampleBanner) {
+        localStorage.setItem('hasSeenParagraphExample', 'true')
+        setShowExampleBanner(false)
+      }
+
       // Track report generation
       metaPixelEvents.generateReport()
 
@@ -187,6 +200,27 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         }} />
       )}
       <form className="job-form" onSubmit={generateReport}>
+        {/* Example Banner - First Time Only */}
+        {showExampleBanner && (
+          <div style={{
+            backgroundColor: '#e3f2fd',
+            border: '2px solid #2196f3',
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '20px',
+            textAlign: 'center'
+          }}>
+            <p style={{
+              margin: 0,
+              fontSize: '16px',
+              color: '#1565c0',
+              fontWeight: '500'
+            }}>
+              👇 <strong>Example text added!</strong> Click "Generate Report" below to see how it works
+            </p>
+          </div>
+        )}
+
         {/* Work Description */}
         <div className="work-details">
           <div className="form-group">
