@@ -22,6 +22,9 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange, sho
     // DO NOT show modal if trial is still active (even if hasAccess is false due to other issues)
     if (subscription?.isExpired || subscription?.noSubscription) {
       setShowModal(true)
+    } else if (subscription?.hasAccess) {
+      // Close modal if user now has access
+      setShowModal(false)
     }
   }, [subscription])
 
