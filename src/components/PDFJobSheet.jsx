@@ -222,6 +222,16 @@ function PDFJobSheet({ companySettings, hasAccess = true, subscriptionStatus = n
     partsUsed: '',
     followUpRequired: 'No', // Yes / No
 
+    // 📞 CALL-OUT SPECIFIC FIELDS
+    faultReported: '',
+    faultLocation: '',
+    callOutcome: '',
+    faultCause: '',
+    actionTaken: '',
+    temporaryFixApplied: 'No',
+    temporaryMeasures: '',
+    systemStatus: '',
+
     // 5️⃣ SIGN-OFF
     customerName: '',
     dateSigned: new Date().toISOString().split('T')[0]
@@ -585,7 +595,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // Helper function to draw a field (label + value)
       const drawField = (label, value, width = null) => {
         const fieldWidth = width || (pageWidth - 2 * margin)
-        const fieldHeight = 9 // Reduced from 12
+        const fieldHeight = 7 // Reduced from 9
 
         checkNewPage(fieldHeight)
 
@@ -599,16 +609,16 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         doc.rect(margin, yPos, fieldWidth, fieldHeight)
 
         // Label text
-        doc.setFontSize(7) // Reduced from 8
+        doc.setFontSize(6.5) // Reduced from 7
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(...darkGray)
-        doc.text(label, margin + 2, yPos + 3)
+        doc.text(label, margin + 2, yPos + 2.5)
 
         // Value text
-        doc.setFontSize(9) // Reduced from 10
+        doc.setFontSize(8) // Reduced from 9
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(0, 0, 0)
-        doc.text(value || '', margin + 2, yPos + 7)
+        doc.text(value || '', margin + 2, yPos + 5.5)
 
         yPos += fieldHeight
       }
@@ -616,7 +626,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // Helper function to draw two fields side by side
       const drawFieldPair = (label1, value1, label2, value2) => {
         const fieldWidth = (pageWidth - 2 * margin) / 2
-        const fieldHeight = 9 // Reduced from 12
+        const fieldHeight = 7 // Reduced from 9
 
         checkNewPage(fieldHeight)
 
@@ -627,15 +637,15 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         doc.setLineWidth(0.2)
         doc.rect(margin, yPos, fieldWidth, fieldHeight)
 
-        doc.setFontSize(7) // Reduced from 8
+        doc.setFontSize(6.5) // Reduced from 7
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(...darkGray)
-        doc.text(label1, margin + 2, yPos + 3)
+        doc.text(label1, margin + 2, yPos + 2.5)
 
-        doc.setFontSize(9) // Reduced from 10
+        doc.setFontSize(8) // Reduced from 9
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(0, 0, 0)
-        doc.text(value1 || '', margin + 2, yPos + 7)
+        doc.text(value1 || '', margin + 2, yPos + 5.5)
 
         // Right field
         const rightX = margin + fieldWidth
@@ -644,15 +654,15 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         doc.setDrawColor(...borderColor)
         doc.rect(rightX, yPos, fieldWidth, fieldHeight)
 
-        doc.setFontSize(7) // Reduced from 8
+        doc.setFontSize(6.5) // Reduced from 7
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(...darkGray)
-        doc.text(label2, rightX + 2, yPos + 3)
+        doc.text(label2, rightX + 2, yPos + 2.5)
 
-        doc.setFontSize(9) // Reduced from 10
+        doc.setFontSize(8) // Reduced from 9
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(0, 0, 0)
-        doc.text(value2 || '', rightX + 2, yPos + 7)
+        doc.text(value2 || '', rightX + 2, yPos + 5.5)
 
         yPos += fieldHeight
       }
@@ -707,32 +717,32 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
       // Helper function to draw section header
       const drawSectionHeader = (title) => {
-        checkNewPage(8)
+        checkNewPage(5)
 
-        yPos += 0.5 // Minimal gap before section header
+        yPos += 0.3 // Minimal gap before section header
 
         doc.setFillColor(...primaryColor)
-        doc.rect(margin, yPos, pageWidth - 2 * margin, 6, 'F') // Reduced from 8
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 4.5, 'F') // Reduced from 5
 
-        doc.setFontSize(9) // Reduced from 11
+        doc.setFontSize(7.5) // Reduced from 8
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(40, 40, 40)
-        doc.text(title, margin + 3, yPos + 4.5)
+        doc.text(title, margin + 3, yPos + 3)
 
-        yPos += 6 // Reduced from 8
+        yPos += 4.5 // Reduced from 5
       }
 
       // Helper function to draw multi-line text area
-      const drawTextArea = (text, minHeight = 20) => { // Reduced from 30
+      const drawTextArea = (text, minHeight = 15) => { // Reduced from 20
         checkNewPage(minHeight)
 
         const boxWidth = pageWidth - 2 * margin
-        doc.setFontSize(9) // Reduced from 10
+        doc.setFontSize(8) // Reduced from 9
         doc.setFont('helvetica', 'normal')
 
         const lines = doc.splitTextToSize(text || '', boxWidth - 6)
-        const lineHeight = 4 // Reduced from 5
-        const textHeight = Math.max(lines.length * lineHeight + 6, minHeight) // Reduced padding from 8 to 6
+        const lineHeight = 3.5 // Reduced from 4
+        const textHeight = Math.max(lines.length * lineHeight + 5, minHeight) // Reduced padding from 6 to 5
 
         // DISABLED: Keep everything on 1 page
         // if (yPos + textHeight > pageHeight - margin - 10) {
@@ -750,7 +760,7 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
 
         // Add text
         doc.setTextColor(0, 0, 0)
-        doc.text(lines, margin + 3, yPos + 5) // Reduced from 6
+        doc.text(lines, margin + 3, yPos + 4) // Reduced from 5
 
         yPos += textHeight
       }
@@ -930,17 +940,48 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // Trade-specific fields will be added in future updates
 
       // ========================================
+      // CALL-OUT DETAILS (if job type is Call-out)
+      // ========================================
+      if (formData.jobType === 'Call-out') {
+        drawSectionHeader('Call-Out Details')
+
+        // Row 1: Fault Reported | Fault Location
+        if (formData.faultReported || formData.faultLocation) {
+          drawFieldPair('Fault Reported', formData.faultReported || 'N/A', 'Fault Location', formData.faultLocation || 'N/A')
+        }
+
+        // Row 2: Outcome | Cause of Fault
+        if (formData.callOutcome || formData.faultCause) {
+          drawFieldPair('Outcome', formData.callOutcome || 'N/A', 'Cause of Fault', formData.faultCause || 'N/A')
+        }
+
+        // Row 3: Action Taken | System Status
+        if (formData.actionTaken || formData.systemStatus) {
+          drawFieldPair('Action Taken', formData.actionTaken || 'N/A', 'System Status on Departure', formData.systemStatus || 'N/A')
+        }
+
+        // Row 4: Temporary Fix Applied | Temporary Measures (if applicable)
+        if (formData.temporaryFixApplied === 'Yes' && formData.temporaryMeasures) {
+          drawFieldPair('Temporary Fix Applied', 'Yes', 'Temporary Measures', formData.temporaryMeasures)
+        } else if (formData.temporaryFixApplied) {
+          drawField('Temporary Fix Applied', formData.temporaryFixApplied)
+        }
+
+        yPos += 1
+      }
+
+      // ========================================
       // WORK DESCRIPTION
       // ========================================
       drawSectionHeader('Work Carried Out')
-      drawTextArea(workDescription || 'No work description provided', 30) // Reduced from 50
+      drawTextArea(workDescription || 'No work description provided', 15) // Reduced from 20
 
       // ========================================
       // PARTS USED (if any)
       // ========================================
       if (formData.partsUsed && formData.partsUsed.trim()) {
         drawSectionHeader('Parts & Materials Used')
-        drawTextArea(formData.partsUsed, 15) // Reduced from 25
+        drawTextArea(formData.partsUsed, 10) // Reduced from 12
       }
 
       // ========================================
@@ -954,9 +995,9 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       // ========================================
       drawSectionHeader('Sign-Off')
 
-      checkNewPage(25) // Reduced from 50
+      checkNewPage(15) // Reduced from 18
 
-      const sigBoxHeight = 20 // Reduced from 30
+      const sigBoxHeight = 10 // Reduced from 12
       const sigBoxWidth = (pageWidth - 2 * margin - 4) / 2
 
       // Customer signature box
@@ -966,27 +1007,32 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       doc.setLineWidth(0.2)
       doc.rect(margin, yPos, sigBoxWidth, sigBoxHeight)
 
-      doc.setFontSize(7) // Reduced from 8
+      doc.setFontSize(6) // Reduced from 6.5
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(...darkGray)
-      doc.text('Customer Signature', margin + 2, yPos + 3)
+      doc.text('Customer Signature', margin + 2, yPos + 2)
 
       // Add signature or name
       if (signatureData) {
         try {
-          doc.addImage(signatureData, 'PNG', margin + 5, yPos + 7, 40, 10) // Reduced size
+          // Position signature to the right side of the box - bigger size
+          const sigWidth = 55
+          const sigHeight = 8
+          const sigX = margin + sigBoxWidth - sigWidth - 2
+          const sigY = yPos + 1.5
+          doc.addImage(signatureData, 'PNG', sigX, sigY, sigWidth, sigHeight)
         } catch (err) {
           console.error('Error adding signature:', err)
-          doc.setFontSize(9) // Reduced from 10
+          doc.setFontSize(7) // Reduced from 8
           doc.setFont('helvetica', 'normal')
           doc.setTextColor(0, 0, 0)
-          doc.text(formData.customerName || '', margin + 3, yPos + 13)
+          doc.text(formData.customerName || '', margin + 3, yPos + 7)
         }
       } else {
-        doc.setFontSize(9) // Reduced from 10
+        doc.setFontSize(7) // Reduced from 8
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(0, 0, 0)
-        doc.text(formData.customerName || '', margin + 3, yPos + 13)
+        doc.text(formData.customerName || '', margin + 3, yPos + 7)
       }
 
       // Engineer signature box
@@ -996,48 +1042,48 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
       doc.setDrawColor(...borderColor)
       doc.rect(rightBoxX, yPos, sigBoxWidth, sigBoxHeight)
 
-      doc.setFontSize(7) // Reduced from 8
+      doc.setFontSize(6) // Reduced from 6.5
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(...darkGray)
-      doc.text('Engineer', rightBoxX + 2, yPos + 3)
+      doc.text('Engineer', rightBoxX + 2, yPos + 2)
 
-      doc.setFontSize(9) // Reduced from 10
+      doc.setFontSize(7) // Reduced from 8
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(0, 0, 0)
-      doc.text(formData.engineerName || '', rightBoxX + 3, yPos + 13)
+      doc.text(formData.engineerName || '', rightBoxX + 3, yPos + 7)
 
-      yPos += sigBoxHeight + 2
+      yPos += sigBoxHeight + 1
 
       // Date fields
       doc.setFillColor(...lightGray)
-      doc.rect(margin, yPos, sigBoxWidth, 10, 'F')
+      doc.rect(margin, yPos, sigBoxWidth, 6, 'F') // Reduced from 7
       doc.setDrawColor(...borderColor)
-      doc.rect(margin, yPos, sigBoxWidth, 10)
+      doc.rect(margin, yPos, sigBoxWidth, 6)
 
-      doc.setFontSize(8)
+      doc.setFontSize(6) // Reduced from 6.5
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(...darkGray)
-      doc.text('Date', margin + 2, yPos + 4)
+      doc.text('Date', margin + 2, yPos + 2)
 
-      doc.setFontSize(9)
+      doc.setFontSize(7) // Reduced from 8
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(0, 0, 0)
-      doc.text(formData.dateSigned, margin + 2, yPos + 8)
+      doc.text(formData.dateSigned, margin + 2, yPos + 4.5)
 
       doc.setFillColor(...lightGray)
-      doc.rect(rightBoxX, yPos, sigBoxWidth, 10, 'F')
+      doc.rect(rightBoxX, yPos, sigBoxWidth, 6, 'F') // Reduced from 7
       doc.setDrawColor(...borderColor)
-      doc.rect(rightBoxX, yPos, sigBoxWidth, 10)
+      doc.rect(rightBoxX, yPos, sigBoxWidth, 6)
 
-      doc.setFontSize(8)
+      doc.setFontSize(6) // Reduced from 6.5
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(...darkGray)
-      doc.text('Date', rightBoxX + 2, yPos + 4)
+      doc.text('Date', rightBoxX + 2, yPos + 2)
 
-      doc.setFontSize(9)
+      doc.setFontSize(7) // Reduced from 8
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(0, 0, 0)
-      doc.text(formData.dateSigned, rightBoxX + 2, yPos + 8)
+      doc.text(formData.dateSigned, rightBoxX + 2, yPos + 4.5)
 
       // Footer
       yPos = pageHeight - 15
@@ -1114,6 +1160,14 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
         workCompleted: '',
         partsUsed: '',
         followUpRequired: 'No',
+        faultReported: '',
+        faultLocation: '',
+        callOutcome: '',
+        faultCause: '',
+        actionTaken: '',
+        temporaryFixApplied: 'No',
+        temporaryMeasures: '',
+        systemStatus: '',
         customerName: '',
         dateSigned: new Date().toISOString().split('T')[0]
       })
@@ -1552,6 +1606,120 @@ Write the job sheet as a single paragraph. Do not use headings, bullet points, b
             </div>
           </div>
         </div>
+
+        {/* Call-Out Specific Fields (only show when Job Type is "Call-out") */}
+        {formData.jobType === 'Call-out' && (
+          <div className="form-section">
+            <h3 className="section-title">📞 Call-Out Details</h3>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="faultReported">Fault Reported / Reason for Call-Out</label>
+                <input
+                  type="text"
+                  id="faultReported"
+                  name="faultReported"
+                  value={formData.faultReported}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Fire alarm fault showing on panel"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="faultLocation">Fault Location (if applicable)</label>
+                <input
+                  type="text"
+                  id="faultLocation"
+                  name="faultLocation"
+                  value={formData.faultLocation}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Reception area"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="callOutcome">Outcome of Call-Out</label>
+                <input
+                  type="text"
+                  id="callOutcome"
+                  name="callOutcome"
+                  value={formData.callOutcome}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Fault found and rectified"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="faultCause">Cause of Fault (if known)</label>
+                <input
+                  type="text"
+                  id="faultCause"
+                  name="faultCause"
+                  value={formData.faultCause}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Device failure"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="actionTaken">Action Taken</label>
+                <input
+                  type="text"
+                  id="actionTaken"
+                  name="actionTaken"
+                  value={formData.actionTaken}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Device reset and system tested"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="systemStatus">System Status on Departure</label>
+                <select
+                  id="systemStatus"
+                  name="systemStatus"
+                  value={formData.systemStatus}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select status...</option>
+                  <option value="System left fully operational">System left fully operational</option>
+                  <option value="System operational with fault present">System operational with fault present</option>
+                  <option value="System isolated">System isolated</option>
+                  <option value="System left in test">System left in test</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="temporaryFixApplied">Temporary Fix Applied?</label>
+                <select
+                  id="temporaryFixApplied"
+                  name="temporaryFixApplied"
+                  value={formData.temporaryFixApplied}
+                  onChange={handleInputChange}
+                >
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+              {formData.temporaryFixApplied === 'Yes' && (
+                <div className="form-group">
+                  <label htmlFor="temporaryMeasures">Temporary Measures Taken</label>
+                  <input
+                    type="text"
+                    id="temporaryMeasures"
+                    name="temporaryMeasures"
+                    value={formData.temporaryMeasures}
+                    onChange={handleInputChange}
+                    placeholder="Describe the temporary measures applied..."
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Servicing-Specific Fields (only show when Job Type is "Service") */}
         {formData.jobType === 'Service' && (
