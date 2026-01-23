@@ -84,8 +84,7 @@ export async function createTrialSubscription(userId) {
       {
         user_id: userId,
         trial_end: trialEnd.toISOString(),
-        subscription_status: 'trial',
-        created_at: new Date().toISOString()
+        subscription_status: 'trial'
       }
     ])
     .select()

@@ -110,6 +110,7 @@ function MainApp() {
           <SubscriptionBanner
             onAccessChange={setHasAccess}
             onStatusChange={setSubscriptionStatus}
+            onViewModeChange={setViewMode}
           />
         )}
 

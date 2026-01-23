@@ -4,7 +4,7 @@ import { createCheckoutSession } from '../lib/stripe'
 import { metaPixelEvents } from '../lib/metaPixel'
 import './SubscriptionBanner.css'
 
-export default function SubscriptionBanner({ onAccessChange, onStatusChange, showBanner = false }) {
+export default function SubscriptionBanner({ onAccessChange, onStatusChange, onViewModeChange, showBanner = false }) {
   const [subscription, setSubscription] = useState(null)
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
@@ -144,6 +144,15 @@ export default function SubscriptionBanner({ onAccessChange, onStatusChange, sho
       metaPixelEvents.startTrial(user.email)
       await loadSubscription()
       console.log('✅ Subscription reloaded')
+
+      // Reset example flag so new users see the example
+      localStorage.removeItem('hasSeenParagraphExample')
+
+      // Switch to paragraph view after trial starts
+      if (onViewModeChange) {
+        console.log('📄 Switching to paragraph view...')
+        onViewModeChange('paragraph')
+      }
     } catch (error) {
       console.error('Error starting trial:', error)
       alert('Failed to start trial. Please try again.')
